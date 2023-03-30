@@ -55,7 +55,7 @@ class DocArrayDataStore(DataStore):
         results = []
         for query in queries:
             embedding = np.array(query.embedding)
-            # filter = ... # TODO(johanens) support filters. For now they are ignored.
+            # filter = ... # TODO(johannes) support filters. For now they are ignored.
             result_docs = self._data.find(embedding, top_k=query.top_k)
             results.append(
                 QueryResult(

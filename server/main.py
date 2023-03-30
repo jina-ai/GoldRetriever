@@ -3,6 +3,8 @@ import uvicorn
 from fastapi import FastAPI, File, HTTPException, Depends, Body, UploadFile
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
+from jina import Flow
+from jina.serve.runtimes.gateway.http.fastapi import FastAPIBaseGateway
 
 from models.api import (
     DeleteRequest,
@@ -138,5 +140,19 @@ async def startup():
     datastore = await get_datastore()
 
 
-def start():
-    uvicorn.run("server.main:app", host="0.0.0.0", port=8000, reload=True)
+class RetrievalGateway(FastAPIBaseGateway):
+    @property
+    def app(self):
+        return app
+
+flow = Flow().config_gateway(
+    uses=RetrievalGateway, port=12345, protocol='http'
+)
+
+with flow:
+    flow.block()
+
+#TODO(johannes): make the indexer a separate Executor, since custom gateway cannot mount a volume
+#TODO(johannes): think about authentication options
+#TODO(johannes): clean up everything
+#TODO(johannes): cli and/or high level python api
