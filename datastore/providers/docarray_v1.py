@@ -1,99 +1,88 @@
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-import numpy as np
-from docarray import DocumentArray
 from docarray import Document as DADoc
 
-from datastore.datastore import DataStore
+from jina import Executor, requests, DocumentArray
+
 from models.models import (
     DocumentChunk,
-    DocumentMetadataFilter,
-    QueryResult,
-    QueryWithEmbedding,
-    DocumentChunkWithScore,
 )
+
 
 DOCARRAY_FILE_PATH = os.environ.get("DOCARRAY_FILE_PATH", "./retrieval_da.bin")
 
 
-class DocArrayDataStore(DataStore):
-    def __init__(self):
+def da_to_doc_chunks(da: DocumentArray) -> List[DocumentChunk]:
+    chunks = []
+    for doc in da:
+        chunks.append(
+            DocumentChunk(
+                text=doc.text,
+                metadata=doc.tags,
+                embedding=list(doc.embedding),
+                id=doc.id,
+            )
+        )
+    return chunks
+
+
+class DocArrayDataStore(Executor):
+    def __init__(self, **kwargs):
         super().__init__()
         try:
-            self._data = DocumentArray.load_binary(DOCARRAY_FILE_PATH)
+            self._index = DocumentArray.load_binary(DOCARRAY_FILE_PATH)
+            print(f"Instantiated index with {len(self._index)} existing documents")
         except:
-            self._data = DocumentArray()
+            self._index = DocumentArray()
+            print(f"Instantiated empty index")
 
-    async def _upsert(self, chunks: Dict[str, List[DocumentChunk]]) -> List[str]:
-        """
-        Takes in a list of list of document chunks and inserts them into the database.
-        Return a list of document ids.
-        """
-        docs_to_append = DocumentArray()
-        for _, chunk_list in chunks.items():
-            for chunk in chunk_list:
-                docs_to_append.append(self.chunk_to_dadoc(chunk))
-        self._data.extend(docs_to_append)
-        self._data.save_binary(DOCARRAY_FILE_PATH)
-        return docs_to_append[:, "id"]
+    @requests(on="/upsert")
+    async def upsert(self, docs: DocumentArray, **kwargs) -> DocumentArray:
+        # Delete any existing vectors for documents with the input document ids
+        # TODO(johannes) re-enable this filtering delete here
+        # await asyncio.gather(
+        #     *[
+        #         self.delete(
+        #             filter=DocumentMetadataFilter(
+        #                 document_id=document.id,
+        #             ),
+        #             delete_all=False,
+        #         )
+        #         for document in documents
+        #         if document.id
+        #     ]
+        # )
 
-    def chunk_to_dadoc(self, chunk: DocumentChunk) -> DADoc:
-        doc = DADoc(
-            text=chunk.text,
-            tags=chunk.metadata.dict(),
-            embedding=np.array(chunk.embedding),
-        )
-        if chunk.id is not None:
-            doc.id = chunk.id
-        return doc
+        docs_to_append = docs[...]
+        self._index.extend(docs[...])
+        self._index.save_binary(DOCARRAY_FILE_PATH)
+        return docs_to_append
 
-    async def _query(self, queries: List[QueryWithEmbedding]) -> List[QueryResult]:
-        """
-        Takes in a list of queries with embeddings and filters and returns a list of query results with matching document chunks and scores.
-        """
-        results = []
-        for query in queries:
-            embedding = np.array(query.embedding)
+    @requests(on="/query")
+    async def query(self, docs: DocumentArray, **kwargs) -> DocumentArray:
+        result_docs = DocumentArray()
+        for (
+            doc
+        ) in docs:  # TODO(johannes) this can probably be rewritten without the loop
             # filter = ... # TODO(johannes) support filters. For now they are ignored.
-            result_docs = self._data.find(embedding, top_k=query.top_k)
-            results.append(
-                QueryResult(
-                    query=query.query,
-                    results=[
-                        self.dadoc_to_chunk_with_score(doc) for doc in result_docs
-                    ],
-                )
-            )
-        return results
+            matches = self._index.find(doc.embedding, top_k=doc.tags["top_k"])
+            result_docs.append(DADoc(id=doc.id, chunks=matches))
 
-    def dadoc_to_chunk_with_score(self, doc: DADoc):
-        return DocumentChunkWithScore(
-            score=list(doc.scores.values())[0].value,
-            id=doc.id,
-            text=doc.text,
-            metadata=doc.tags,
-            embedding=list(doc.embedding),
-        )
+        return result_docs
 
-    async def delete(
-        self,
-        ids: Optional[List[str]] = None,
-        filter: Optional[DocumentMetadataFilter] = None,
-        delete_all: Optional[bool] = None,
-    ) -> bool:
-        """
-        Removes vectors by ids, filter, or everything in the datastore.
-        Multiple parameters can be used at once.
-        Returns whether the operation was successful.
-        """
+    @requests(on="/delete")
+    async def delete(self, docs: DocumentArray, parameters: Dict, **kwargs) -> DocumentArray:
+        delete_all = parameters.get("delete_all", False)
+        ids = docs[:, "id"]
+        filters = parameters.get("filters", None)
         if delete_all:
-            self._data = DocumentArray()
-            self._data.save_binary(DOCARRAY_FILE_PATH)
-            return True
-        if ids is not None:
-            del self._data[ids]
-            self._data.save_binary(DOCARRAY_FILE_PATH)
-            return True
+            self._index = DocumentArray()
+            self._index.save_binary(DOCARRAY_FILE_PATH)
+            return DocumentArray(DADoc(tags={"success": True}))
+        if ids:
+            del self._index[ids]
+            self._index.save_binary(DOCARRAY_FILE_PATH)
+            return DocumentArray(DADoc(tags={"success": True}))
         # TODO(johanens) support filters. For now they are ignored.
-        return False
+        return DocumentArray(DADoc(tags={"success": False}))
