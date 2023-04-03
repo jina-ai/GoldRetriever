@@ -9,10 +9,6 @@ from fastapi.staticfiles import StaticFiles
 from jina.serve.runtimes.gateway.http.fastapi import FastAPIBaseGateway
 from docarray import Document as DADoc, DocumentArray
 
-print('------------------------')
-dir_path = os.path.dirname(os.path.realpath(__file__))
-print(os.listdir(dir_path))
-
 from models.api import (
     DeleteRequest,
     DeleteResponse,
@@ -89,8 +85,9 @@ class RetrievalGateway(FastAPIBaseGateway):
         super().__init__(**kwargs)
         self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN_ENV
         assert self.bearer_token is not None
-        os.environ["OPENAI_API_KEY"] = openai_token  # TODO(johannes): hacky, change to pass around
-        print(f'{os.environ.get("OPENAI_API_KEY", None)=}')
+        if openai_token:
+            os.environ["OPENAI_API_KEY"] = openai_token  # TODO(johannes): hacky, change to pass around
+        assert os.environ.get("OPENAI_API_KEY", None) is not None
 
     async def perform_upsert_call(
         self, chunks: Dict[str, List[DocumentChunk]]

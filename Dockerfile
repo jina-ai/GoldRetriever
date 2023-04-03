@@ -23,4 +23,6 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 COPY . /code/
 
+ENV PYTHONPATH "${PYTHONPATH}:/code"
+
 ENTRYPOINT ["jina", "gateway", "--uses", "gateway/config.yml"]
