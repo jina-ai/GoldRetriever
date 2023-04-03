@@ -5,7 +5,7 @@ import weaviate
 import os
 from models.models import DocumentMetadataFilter, Source
 from server.main import app
-from datastore.providers.weaviate_datastore import (
+from datastore.executor.weaviate_datastore import (
     SCHEMA,
     WeaviateDataStore,
     extract_schema_properties,

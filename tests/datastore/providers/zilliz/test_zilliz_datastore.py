@@ -8,11 +8,10 @@ from models.models import (
     DocumentChunkMetadata,
     DocumentMetadataFilter,
     DocumentChunk,
-    Query,
     QueryWithEmbedding,
     Source,
 )
-from datastore.providers.zilliz_datastore import (
+from datastore.executor.zilliz_datastore import (
     OUTPUT_DIM,
     ZillizDataStore,
 )

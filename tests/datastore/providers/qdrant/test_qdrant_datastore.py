@@ -4,7 +4,7 @@ import pytest
 import qdrant_client
 from qdrant_client.http.models import PayloadSchemaType
 
-from datastore.providers.qdrant_datastore import QdrantDataStore
+from datastore.executor.qdrant_datastore import QdrantDataStore
 from models.models import (
     DocumentChunk,
     DocumentChunkMetadata,

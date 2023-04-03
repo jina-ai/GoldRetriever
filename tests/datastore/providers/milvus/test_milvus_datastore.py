@@ -11,7 +11,7 @@ from models.models import (
     QueryWithEmbedding,
     Source,
 )
-from datastore.providers.milvus_datastore import (
+from datastore.executor.milvus_datastore import (
     OUTPUT_DIM,
     MilvusDataStore,
 )

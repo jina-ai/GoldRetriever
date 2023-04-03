@@ -1,0 +1,4 @@
+jtype: RetrievalGateway
+py_modules:
+  - gateway.py
+port: 12345

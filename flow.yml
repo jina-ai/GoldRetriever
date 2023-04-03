@@ -1,0 +1,18 @@
+jtype: Flow
+version: '1'
+with: {}
+executors:
+- name: executor0
+  polling: "ANY"
+  uses: DocArrayDataStore
+  port:
+  - 54190
+  port_monitoring: 59391
+gateway:
+  protocol:
+  - "HTTP"
+  uses: RetrievalGateway
+  port:
+  - 12345
+  port_monitoring:
+  - 51036

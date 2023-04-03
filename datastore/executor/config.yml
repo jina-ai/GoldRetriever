@@ -1,0 +1,7 @@
+jtype: DocArrayDataStore
+py_modules:
+  - docarray_v1.py
+description: Indexer for ChatGPT retrieval plugin
+metas:
+  name: GptPluginIndexer
+  workspace: workspace/

@@ -1,3 +1,4 @@
+import functools
 import os
 from typing import Dict, List, Optional
 
@@ -7,6 +8,10 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from jina.serve.runtimes.gateway.http.fastapi import FastAPIBaseGateway
 from docarray import Document as DADoc, DocumentArray
+
+print('------------------------')
+dir_path = os.path.dirname(os.path.realpath(__file__))
+print(os.listdir(dir_path))
 
 from models.api import (
     DeleteRequest,
@@ -29,11 +34,11 @@ from services.openai import get_embeddings
 
 bearer_scheme = HTTPBearer()
 BEARER_TOKEN = os.environ.get("BEARER_TOKEN")
-assert BEARER_TOKEN is not None
+#assert BEARER_TOKEN is not None
 
 
-def validate_token(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
-    if credentials.scheme != "Bearer" or credentials.credentials != BEARER_TOKEN:
+def validate_token(bearer_token: str, credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+    if credentials.scheme != "Bearer" or credentials.credentials != bearer_token:
         raise HTTPException(status_code=401, detail="Invalid or missing token")
     return credentials
 
@@ -81,6 +86,13 @@ def doc_to_query_result(doc: DADoc) -> QueryResult:
 
 
 class RetrievalGateway(FastAPIBaseGateway):
+    def __init__(self, bearer_token: Optional[str] = None, openai_token: str = '', **kwargs):
+        super().__init__(**kwargs)
+        print(f'{bearer_token=}; {openai_token=}')
+        self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN
+        assert self.bearer_token is not None
+        os.environ["OPENAI_API_KEY"] = openai_token  # TODO(johannes): hacky, change to pass around
+
     async def perform_upsert_call(
         self, chunks: Dict[str, List[DocumentChunk]]
     ) -> UpsertResponse:
@@ -124,7 +136,8 @@ class RetrievalGateway(FastAPIBaseGateway):
 
     @property
     def app(self):
-        app = FastAPI(dependencies=[Depends(validate_token)])
+        val_token = functools.partial(validate_token, BEARER_TOKEN)
+        app = FastAPI(dependencies=[Depends(val_token)])
         app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
@@ -133,7 +146,7 @@ class RetrievalGateway(FastAPIBaseGateway):
             description="A retrieval API for querying and filtering documents based on natural language queries and metadata",
             version="1.0.0",
             servers=[{"url": "https://your-app-url.com"}],
-            dependencies=[Depends(validate_token)],
+            dependencies=[Depends(val_token)],
         )
         app.mount("/sub", sub_app)
 

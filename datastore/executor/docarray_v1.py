@@ -1,37 +1,18 @@
 import os
-from typing import Dict, List
-
+from typing import Dict
 from docarray import Document as DADoc
-
 from jina import Executor, requests, DocumentArray
 
-from models.models import (
-    DocumentChunk,
-)
 
-
-DOCARRAY_FILE_PATH = os.environ.get("DOCARRAY_FILE_PATH", "./retrieval_da.bin")
-
-
-def da_to_doc_chunks(da: DocumentArray) -> List[DocumentChunk]:
-    chunks = []
-    for doc in da:
-        chunks.append(
-            DocumentChunk(
-                text=doc.text,
-                metadata=doc.tags,
-                embedding=list(doc.embedding),
-                id=doc.id,
-            )
-        )
-    return chunks
+DEFAULT_INDEX_PATH = os.environ.get("DOCARRAY_FILE_PATH", "./retrieval_da.bin")
 
 
 class DocArrayDataStore(Executor):
     def __init__(self, **kwargs):
         super().__init__()
+        self._index_file_path = kwargs.get('index_file_path', DEFAULT_INDEX_PATH)
         try:
-            self._index = DocumentArray.load_binary(DOCARRAY_FILE_PATH)
+            self._index = DocumentArray.load_binary(self._index_file_path)
             print(f"Instantiated index with {len(self._index)} existing documents")
         except:
             self._index = DocumentArray()
@@ -56,7 +37,7 @@ class DocArrayDataStore(Executor):
 
         docs_to_append = docs[...]
         self._index.extend(docs[...])
-        self._index.save_binary(DOCARRAY_FILE_PATH)
+        self._index.save_binary(self._index_file_path)
         return docs_to_append
 
     @requests(on="/query")
@@ -78,11 +59,11 @@ class DocArrayDataStore(Executor):
         filters = parameters.get("filters", None)
         if delete_all:
             self._index = DocumentArray()
-            self._index.save_binary(DOCARRAY_FILE_PATH)
+            self._index.save_binary(self._index_file_path)
             return DocumentArray(DADoc(tags={"success": True}))
         if ids:
             del self._index[ids]
-            self._index.save_binary(DOCARRAY_FILE_PATH)
+            self._index.save_binary(self._index_file_path)
             return DocumentArray(DADoc(tags={"success": True}))
         # TODO(johanens) support filters. For now they are ignored.
         return DocumentArray(DADoc(tags={"success": False}))

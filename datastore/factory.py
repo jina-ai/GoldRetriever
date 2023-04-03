@@ -8,32 +8,32 @@ async def get_datastore() -> DataStore:
 
     match datastore:
         case "docarray":
-            from datastore.providers.docarray_v1 import DocArrayDataStore
+            from datastore.executor.docarray_v1 import DocArrayDataStore
 
             return DocArrayDataStore()
 
         case "pinecone":
-            from datastore.providers.pinecone_datastore import PineconeDataStore
+            from datastore.executor.pinecone_datastore import PineconeDataStore
 
             return PineconeDataStore()
         case "weaviate":
-            from datastore.providers.weaviate_datastore import WeaviateDataStore
+            from datastore.executor.weaviate_datastore import WeaviateDataStore
 
             return WeaviateDataStore()
         case "milvus":
-            from datastore.providers.milvus_datastore import MilvusDataStore
+            from datastore.executor.milvus_datastore import MilvusDataStore
 
             return MilvusDataStore()
         case "zilliz":
-            from datastore.providers.zilliz_datastore import ZillizDataStore
+            from datastore.executor.zilliz_datastore import ZillizDataStore
 
             return ZillizDataStore()
         case "redis":
-            from datastore.providers.redis_datastore import RedisDataStore
+            from datastore.executor.redis_datastore import RedisDataStore
 
             return await RedisDataStore.init()
         case "qdrant":
-            from datastore.providers.qdrant_datastore import QdrantDataStore
+            from datastore.executor.qdrant_datastore import QdrantDataStore
 
             return QdrantDataStore()
         case _:
