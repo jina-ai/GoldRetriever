@@ -21,7 +21,6 @@ def get_embeddings(texts: List[str]) -> List[List[float]]:
     """
     # Call the OpenAI API to get the embeddings
     import os
-    print(f'in service: {os.environ.get("OPENAI_API_KEY", None)=}')
     openai.api_key = os.environ.get("OPENAI_API_KEY", None)
     response = openai.Embedding.create(input=texts, model="text-embedding-ada-002")
 

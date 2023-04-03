@@ -1,7 +1,8 @@
 import os
 from typing import Optional
 from jina import Flow
-from gateway.gateway import RetrievalGateway
+from jina.excepts import BadImageNameError, RuntimeFailToStart
+from gateway import RetrievalGateway
 from datastore.executor.docarray_v1 import DocArrayDataStore
 
 import typer
@@ -35,17 +36,20 @@ def launch(bearer_token: Optional[str], openai_token: Optional[str]):
         bearer_token if bearer_token is not None else os.environ.get("BEARER_TOKEN")
     )
 
-    flow = (
-        Flow()
-        .config_gateway(
-            uses="docker://plugin-gateway-two",
-            port=12345,
-            protocol="http",
-            env={"OPENAI_API_KEY": openai_key, "BEARER_TOKEN": bearer},
+    try:
+        flow = (
+            Flow()
+            .config_gateway(
+                uses="docker://plugin-gateway-two",
+                port=12345,
+                protocol="http",
+                env={"OPENAI_API_KEY": openai_key, "BEARER_TOKEN": bearer},
+            )
+            .add(uses="docker://gpt-plugin-indexer")
         )
-        .add(uses="docker://gpt-plugin-indexer")
-    )
-
+    except Exception as e:
+        print('Did you build the docker images? You can also use the `launch_no_docker` command to run without docker.')
+        raise e
     with flow:
         flow.block()
 

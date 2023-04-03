@@ -25,4 +25,4 @@ COPY . /code/
 
 ENV PYTHONPATH "${PYTHONPATH}:/code"
 
-ENTRYPOINT ["jina", "gateway", "--uses", "gateway/config.yml"]
+ENTRYPOINT ["jina", "gateway", "--uses", "config.yml"]
