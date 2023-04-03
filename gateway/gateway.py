@@ -33,8 +33,7 @@ from services.file import get_document_from_file
 from services.openai import get_embeddings
 
 bearer_scheme = HTTPBearer()
-BEARER_TOKEN = os.environ.get("BEARER_TOKEN")
-#assert BEARER_TOKEN is not None
+BEARER_TOKEN_ENV = os.environ.get("BEARER_TOKEN")
 
 
 def validate_token(bearer_token: str, credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
@@ -88,9 +87,10 @@ def doc_to_query_result(doc: DADoc) -> QueryResult:
 class RetrievalGateway(FastAPIBaseGateway):
     def __init__(self, bearer_token: Optional[str] = None, openai_token: str = '', **kwargs):
         super().__init__(**kwargs)
-        self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN
+        self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN_ENV
         assert self.bearer_token is not None
         os.environ["OPENAI_API_KEY"] = openai_token  # TODO(johannes): hacky, change to pass around
+        print(f'{os.environ.get("OPENAI_API_KEY", None)=}')
 
     async def perform_upsert_call(
         self, chunks: Dict[str, List[DocumentChunk]]
@@ -135,7 +135,7 @@ class RetrievalGateway(FastAPIBaseGateway):
 
     @property
     def app(self):
-        val_token = functools.partial(validate_token, BEARER_TOKEN)
+        val_token = functools.partial(validate_token, self.bearer_token)
         app = FastAPI(dependencies=[Depends(val_token)])
         app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
