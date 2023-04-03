@@ -88,7 +88,6 @@ def doc_to_query_result(doc: DADoc) -> QueryResult:
 class RetrievalGateway(FastAPIBaseGateway):
     def __init__(self, bearer_token: Optional[str] = None, openai_token: str = '', **kwargs):
         super().__init__(**kwargs)
-        print(f'{bearer_token=}; {openai_token=}')
         self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN
         assert self.bearer_token is not None
         os.environ["OPENAI_API_KEY"] = openai_token  # TODO(johannes): hacky, change to pass around
