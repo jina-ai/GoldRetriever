@@ -2,17 +2,21 @@ jtype: Flow
 version: '1'
 with: {}
 executors:
-- name: executor0
+- name: index
   polling: "ANY"
-  uses: DocArrayDataStore
+  uses: jinaai+docker://auth0-unified-81a0df13661993b0/GptPluginIndexer:latest
   port:
   - 54190
   port_monitoring: 59391
+
 gateway:
   protocol:
   - "HTTP"
-  uses: RetrievalGateway
+  uses: jinaai+docker://auth0-unified-81a0df13661993b0/GptRetrievalGateway:latest
   port:
   - 12345
   port_monitoring:
-  - 51036
+    - 51036
+  env:
+    OPENAI_API_KEY: <your-openai-api-key>
+    BEARER_TOKEN: <your-bearer-token>
