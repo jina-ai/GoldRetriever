@@ -8,6 +8,19 @@ executors:
 - name: index
   polling: "ANY"
   uses: jinaai+docker://auth0-unified-b06aa99c0fdac54c/GptPluginIndexer:latest
+  needs: gateway
+  jcloud:
+    autoscale:
+      min: 0
+      max: 4
+      metric: 'concurrency'
+      target: 1
+    resources:
+      instance: 'C1'
+      capacity: 'spot'
+      storage:
+        kind: 'efs'
+        size: '100M'
   port:
   - 54190
   port_monitoring: 59391
