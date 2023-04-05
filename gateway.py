@@ -85,6 +85,8 @@ class RetrievalGateway(FastAPIBaseGateway):
         super().__init__(**kwargs)
         self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN_ENV
         assert self.bearer_token is not None
+        self.token_validation = functools.partial(validate_token, self.bearer_token)
+
         if openai_token:
             os.environ["OPENAI_API_KEY"] = openai_token  # TODO(johannes): hacky, change to pass around
         assert os.environ.get("OPENAI_API_KEY", None) is not None
@@ -132,8 +134,7 @@ class RetrievalGateway(FastAPIBaseGateway):
 
     @property
     def app(self):
-        val_token = functools.partial(validate_token, self.bearer_token)
-        app = FastAPI(dependencies=[Depends(val_token)])
+        app = FastAPI()
         app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
@@ -149,6 +150,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/upsert-file",
             response_model=UpsertResponse,
+            dependencies=[Depends(self.token_validation)]
         )
         async def upsert_file(
             file: UploadFile = File(...),
@@ -167,6 +169,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/upsert",
             response_model=UpsertResponse,
+            dependencies=[Depends(self.token_validation)]
         )
         async def upsert(
             request: UpsertRequest = Body(...),
@@ -183,6 +186,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/query",
             response_model=QueryResponse,
+            dependencies=[Depends(self.token_validation)]
         )
         async def query_main(
             request: QueryRequest = Body(...),
@@ -209,6 +213,7 @@ class RetrievalGateway(FastAPIBaseGateway):
             response_model=QueryResponse,
             # NOTE: We are describing the shape of the API endpoint input due to a current limitation in parsing arrays of objects from OpenAPI schemas. This will not be necessary in the future.
             description="Accepts search query objects array each with query and optional filter. Break down complex questions into sub-questions. Refine results by criteria, e.g. time / source, don't do this often. Split queries if ResponseTooLargeError occurs.",
+            dependencies=[Depends(self.token_validation)],
         )
         async def query(
             request: QueryRequest = Body(...),
@@ -232,6 +237,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.delete(
             "/delete",
             response_model=DeleteResponse,
+            dependencies=[Depends(self.token_validation)]
         )
         async def delete(
             request: DeleteRequest = Body(...),

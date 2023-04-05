@@ -1,4 +1,4 @@
-FROM jinaai/jina:latest
+FROM jinaai/jina:3.14.1-py310-standard
 
 COPY . /executor_root/
 
