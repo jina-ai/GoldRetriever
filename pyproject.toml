@@ -30,6 +30,7 @@ docarray = "^0.21.0"
 jina = "^3.14.1"
 jcloud = "^0.2.5"
 typer = "^0.7.0"
+pyjwt = "2.6.0"
 
 [tool.poetry.scripts]
 start = "server.main:start"
