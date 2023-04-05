@@ -62,7 +62,7 @@ def dadoc_to_chunk_with_score(doc: DADoc):
 def query_to_doc(query: Query, embedding: Optional[List[float]] = None) -> DADoc:
     tags = dict()
     if query.filter is not None:
-        tags["filter"] = query.filter.dict()
+        tags["filters"] = query.filter.dict()
     if query.top_k is not None:
         tags["top_k"] = query.top_k
     doc = DADoc(
@@ -117,16 +117,17 @@ class RetrievalGateway(FastAPIBaseGateway):
 
     async def perform_delete_call(
         self,
-        ids: List[str],
+        ids: Optional[List[str]] = None,
         delete_all: Optional[bool] = None,
         filter: Optional[DocumentMetadataFilter] = None,
     ) -> bool:
+        ids = ids or []
         docs = DocumentArray([DADoc(id=id) for id in ids])
         parameters = {"delete_all": delete_all, "filter": filter.dict()}
         async for docs in self.streamer.stream_docs(
             docs=docs,
             parameters=parameters,
-            exec_endpoint="/query",
+            exec_endpoint="/delete",
         ):
             if len([doc for doc in docs if doc.tags.get("success", False)]) > 0:
                 return True
