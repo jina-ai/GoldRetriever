@@ -1,3 +1,4 @@
+import asyncio
 import os
 import random
 import string
@@ -7,6 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 import jwt
+import requests
 import typer
 from hubble.api import login as login_jina
 from jcloud.api import deploy as deploy_flow
@@ -36,6 +38,29 @@ def generate_bearer_token():
     return jwt.encode(payload, "my_secret", algorithm="HS256")
 
 
+def write_envs(new_envs):
+    old_envs = {}
+    if os.path.exists('.env'):
+        with open(".env", "r") as f:
+            for line in f:
+                key, value = line.strip().split("=")
+                old_envs[key] = value
+
+    env_vars = {**old_envs, **new_envs}
+
+    with open(".env", "w") as f:
+        for key, value in env_vars.items():
+            f.write(f"{key}={value}\n")
+
+
+def read_envs():
+    if os.path.exists('.env'):
+        with open(".env", "r") as f:
+            for line in f:
+                key, value = line.strip().split("=")
+                os.environ[key] = value
+
+
 @app.command()
 def launch_no_docker(bearer_token: Optional[str], openai_token: Optional[str]):
     flow = (
@@ -51,6 +76,97 @@ def launch_no_docker(bearer_token: Optional[str], openai_token: Optional[str]):
 
     with flow:
         flow.block()
+
+
+def create_eventloop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    return asyncio.get_event_loop()
+
+
+@app.command()
+def index(
+    file: str = typer.Option,
+    bearer_token: Optional[str] = typer.Option(None),
+    flow_id: Optional[str] = typer.Option(None),
+):
+    read_envs()
+    flow_id = flow_id or os.environ["RETRIEVAL_FLOW_ID"]
+    if not flow_id:
+        raise ValueError(
+            "Flow ID is not provided. You should either export your "
+            "flow ID as an environment variable `RETRIEVAL_FLOW_ID` or "
+            "provide it through the CLI `--flow-id <your-flow-id>`"
+        )
+
+    bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
+    if not bearer_token:
+        raise ValueError(
+            "No Bearer token is provided. You should either export your "
+            "token as an environment variable `RETRIEVAL_BEARER_TOKEN` or "
+            "provide it through the CLI `--bearer-token <your token>`"
+        )
+
+    if not os.path.exists(file):
+        raise FileNotFoundError(f'{file} does not exist')
+
+    endpoint_url = f"https://{flow_id}-http.wolf.jina.ai/upsert"
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {bearer_token}",
+    }
+    file = {'file': open(file, 'rb')}
+
+    response = requests.post(endpoint_url, headers=headers, files=file)
+    print(response.json())
+
+
+@app.command()
+def index_doc(
+    bearer_token: Optional[str] = typer.Option(None),
+    flow_id: Optional[str] = typer.Option(None),
+):
+    read_envs()
+    flow_id = flow_id or os.environ["RETRIEVAL_FLOW_ID"]
+    if not flow_id:
+        raise ValueError(
+            "Flow ID is not provided. You should either export your "
+            "flow ID as an environment variable `RETRIEVAL_FLOW_ID` or "
+            "provide it through the CLI `--flow-id <your-flow-id>`"
+        )
+
+    bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
+    if not bearer_token:
+        raise ValueError(
+            "No Bearer token is provided. You should either export your "
+            "token as an environment variable `RETRIEVAL_BEARER_TOKEN` or "
+            "provide it through the CLI `--bearer-token <your token>`"
+        )
+
+    endpoint_url = f"https://{flow_id}-http.wolf.jina.ai/upsert"
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {bearer_token}",
+    }
+    data = {
+        "documents": [
+            {
+                "id": "my_id",
+                "text": "this is my coll message! Innit neat?",
+                "metadata": {
+                    "source": "email",
+                    "source_id": "string",
+                    "url": "string",
+                    "created_at": "string",
+                    "author": "string",
+                },
+            }
+        ]
+    }
+    response = requests.post(endpoint_url, headers=headers, json=data)
+    print(response.json())
 
 
 @app.command()
@@ -90,6 +206,7 @@ def deploy(
     args = Namespace(force=False)
     login_jina(args)
 
+    read_envs()
     bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
     if not bearer_token:
         bearer_token = generate_bearer_token()
@@ -115,7 +232,15 @@ def deploy(
             f"Your Bearer token for this deployment is - {bearer_token} - "
             f"Please store it as you will need it to interact with the plugin."
         )
-        deploy_flow(args)
+        flow = deploy_flow(args)
+
+        write_envs(
+            {
+                "RETRIEVAL_BEARER_TOKEN": bearer_token,
+                "RETRIEVAL_FLOW_ID": flow.flow_id,
+                "RETRIEVAL_OPENAI_TOKEN": openai_token,
+            }
+        )
 
     finally:
         os.remove(tmp_config_path)
