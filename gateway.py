@@ -140,8 +140,8 @@ class RetrievalGateway(FastAPIBaseGateway):
         app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
         # construct URL
-        flow_id = 'retrieval-plugin-' + os.environ['K8S-NAMESPACE'].split('-')[-1]
-        self.url = f'https://{flow_id}-http.wolf.jina.ai'
+        flow_id = 'retrieval-plugin-' + os.environ['K8S_NAMESPACE_NAME'].split('-')[1]
+        self.url = f'https://{flow_id}.wolf.jina.ai'
 
         # replace placeholder URL in the configuration
         with open('.well-known/ai-plugin.json', 'r') as f:

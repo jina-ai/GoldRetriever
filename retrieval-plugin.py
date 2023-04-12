@@ -144,7 +144,7 @@ def index_doc(
             "provide it through the CLI `--bearer-token <your token>`"
         )
 
-    endpoint_url = f"https://{flow_id}-http.wolf.jina.ai/upsert"
+    endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
