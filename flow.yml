@@ -1,7 +1,13 @@
 jtype: Flow
 version: '1'
 jcloud:
-  name: 'retrieval-plugin'
+  name: retrieval-plugin
+gateway:
+  protocol: [http]
+  uses: jinaai+docker://auth0-unified-b06aa99c0fdac54c/GptRetrievalGateway:latest
+  port:
+    - 12345
+  port_monitoring: 51036
 with:
   env:
     OPENAI_API_KEY: <your-openai-api-key>
@@ -12,29 +18,17 @@ executors:
   uses: jinaai+docker://auth0-unified-b06aa99c0fdac54c/GptPluginIndexer:latest
   needs: gateway
   jcloud:
-    autoscale:
-      min: 0
-      max: 4
-      metric: 'concurrency'
-      target: 1
+#    autoscale:
+#      min: 1
+#      max: 4
+#      metric: concurrency
+#      target: 1
     resources:
-      instance: 'C1'
-      capacity: 'spot'
+      instance: C1
+      capacity: spot
       storage:
-        kind: 'efs'
-        size: '100M'
+        kind: efs
+        size: 0.1G
   port:
-  - 54190
+    - 54190
   port_monitoring: 59391
-
-gateway:
-  protocol:
-  - "HTTP"
-  uses: jinaai+docker://auth0-unified-b06aa99c0fdac54c/GptRetrievalGateway:latest
-  port:
-  - 12345
-  port_monitoring:
-    - 51036
-#  env:
-#    OPENAI_API_KEY: <your-openai-api-key>
-#    BEARER_TOKEN: <your-bearer-token>

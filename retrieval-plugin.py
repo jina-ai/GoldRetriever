@@ -145,6 +145,7 @@ def index_doc(
         )
 
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
+    print(endpoint_url)
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
