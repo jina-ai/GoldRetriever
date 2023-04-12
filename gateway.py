@@ -1,4 +1,5 @@
 import functools
+import json
 import os
 from typing import Dict, List, Optional
 
@@ -138,12 +139,25 @@ class RetrievalGateway(FastAPIBaseGateway):
         app = FastAPI()
         app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
+        # construct URL
+        flow_id = 'retrieval-plugin-' + os.environ['K8S-NAMESPACE'].split('-')[-1]
+        self.url = f'https://{flow_id}-http.wolf.jina.ai'
+
+        # replace placeholder URL in the configuration
+        with open('.well-known/ai-plugin.json', 'r') as f:
+            data = json.load(f)
+            data['api']['url'] = data['api']['url'].replace('<your_url>', self.url)
+            data['logo_url'] = data['logo_url'].replace('<your_url>', self.url)
+
+        with open('.well-known/ai-plugin.json', 'w') as f:
+            json.dump(data, f, indent=2)
+
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
         sub_app = FastAPI(
             title="Retrieval Plugin API",
             description="A retrieval API for querying and filtering documents based on natural language queries and metadata",
             version="1.0.0",
-            servers=[{"url": "https://your-app-url.com"}],
+            servers=[{"url": self.url}],
             dependencies=[Depends(self.token_validation)],
         )
         app.mount("/sub", sub_app)
@@ -258,9 +272,3 @@ class RetrievalGateway(FastAPIBaseGateway):
                 raise HTTPException(status_code=500, detail="Internal Service Error")
 
         return app
-
-
-# TODO(johannes): make the indexer a separate Executor, since custom gateway cannot mount a volume
-# TODO(johannes): think about authentication options
-# TODO(johannes): clean up everything
-# TODO(johannes): cli and/or high level python api
