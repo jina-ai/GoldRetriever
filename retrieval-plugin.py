@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import random
 import string
@@ -10,6 +11,7 @@ from typing import Optional
 import jwt
 import requests
 import typer
+from docarray import DocumentArray
 from hubble.api import login as login_jina
 from jcloud.api import deploy as deploy_flow
 from jina import Flow
@@ -123,7 +125,35 @@ def index(
 
 
 @app.command()
-def index_doc(
+def configure(
+    name: str = typer.Option(None),
+    description: str = typer.Option(None),
+    email: str = typer.Option(None),
+    info_url: str = typer.Option(None),
+):
+    with open('.well-known/ai-plugin.json', 'r') as f:
+        config = json.load(f)
+
+    if name:
+        config['name_for_model'] = name
+    if description:
+        config['description_for_model'] = description
+    if email:
+        config['contact_email'] = email
+    if info_url:
+        config['legal_info_url'] = info_url
+
+    if name or description or email or info_url:
+        with open('.well-known/ai-plugin.json', 'w') as f:
+            json.dump(config, f, indent=2)
+        print('Configuration has been successfully updated')
+    else:
+        print('Configuration has not been changed')
+
+
+@app.command()
+def index_docs(
+    docs: str = typer.Option,
     bearer_token: Optional[str] = typer.Option(None),
     flow_id: Optional[str] = typer.Option(None),
 ):
@@ -146,26 +176,32 @@ def index_doc(
 
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
     print(endpoint_url)
+    if os.path.exists(docs):
+        docs = DocumentArray.load_binary(docs)
+    else:
+        try:
+            docs = DocumentArray.pull(docs)
+        except:
+            raise Exception('Could not find documents')
+
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
         "Authorization": f"Bearer {bearer_token}",
     }
-    data = {
-        "documents": [
-            {
-                "id": "my_id",
-                "text": "this is my coll message! Innit neat?",
+    data = {"documents": []}
+    for ind, doc in enumerate(docs):
+        data["documents"].append({
+                "id": str(ind),
+                "text": doc.text,
                 "metadata": {
-                    "source": "email",
-                    "source_id": "string",
-                    "url": "string",
-                    "created_at": "string",
-                    "author": "string",
+                    "source": doc.tags.get("source", "email"),
+                    "source_id": doc.tags.get("source_id", "string"),
+                    "url": doc.tags.get("url", "string"),
+                    "created_at": doc.tags.get("created_at", "string"),
+                    "author": doc.tags.get("author", "string"),
                 },
-            }
-        ]
-    }
+            })
     response = requests.post(endpoint_url, headers=headers, json=data)
     print(response.json())
 

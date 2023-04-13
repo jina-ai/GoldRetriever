@@ -4,6 +4,7 @@ import os
 from typing import Dict, List, Optional
 
 import numpy as np
+import yaml
 from fastapi import FastAPI, File, HTTPException, Depends, Body, UploadFile
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
@@ -134,23 +135,41 @@ class RetrievalGateway(FastAPIBaseGateway):
                 return True
         return False
 
+    @staticmethod
+    def modify_config_files(url):
+        # replace placeholder URL in the configuration
+        with open('.well-known/ai-plugin.json', 'r') as f:
+            plugin_json = json.load(f)
+
+        plugin_json['api']['url'] = plugin_json['api']['url'].replace('<your_url>', url)
+        plugin_json['logo_url'] = plugin_json['logo_url'].replace('<your_url>', url)
+
+        with open('.well-known/ai-plugin.json', 'w') as f:
+            json.dump(plugin_json, f, indent=2)
+
+        with open('.well-known/openapi.yaml', 'r') as f:
+            openapi_yaml = yaml.safe_load(f)
+
+        openapi_yaml['info']['servers'] = url
+
+        with open('.well-known/openapi.yaml', 'w') as f:
+            yaml.dump(openapi_yaml, f)
+
     @property
     def app(self):
         app = FastAPI()
         app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
         # construct URL
-        flow_id = 'retrieval-plugin-' + os.environ['K8S_NAMESPACE_NAME'].split('-')[1]
+        try:
+            namespace = os.environ['K8S_NAMESPACE_NAME'].split('-')[1]
+        except:
+            raise Exception('Could not get the namespace')
+
+        flow_id = 'retrieval-plugin' + '-' + namespace
         self.url = f'https://{flow_id}.wolf.jina.ai'
 
-        # replace placeholder URL in the configuration
-        with open('.well-known/ai-plugin.json', 'r') as f:
-            data = json.load(f)
-            data['api']['url'] = data['api']['url'].replace('<your_url>', self.url)
-            data['logo_url'] = data['logo_url'].replace('<your_url>', self.url)
-
-        with open('.well-known/ai-plugin.json', 'w') as f:
-            json.dump(data, f, indent=2)
+        self.modify_config_files(url=self.url)
 
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
         sub_app = FastAPI(
