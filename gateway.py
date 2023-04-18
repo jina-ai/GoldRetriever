@@ -169,7 +169,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         flow_id = 'retrieval-plugin' + '-' + namespace
         self.url = f'https://{flow_id}.wolf.jina.ai'
 
-        self.modify_config_files(url=self.url)
+        self.modify_config_files(url='https://retrieval.jina.ai')
 
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
         sub_app = FastAPI(

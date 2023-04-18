@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import random
+import shutil
 import string
 import tempfile
 from argparse import Namespace
@@ -14,6 +15,7 @@ import typer
 from docarray import DocumentArray
 from hubble.api import login as login_jina
 from jcloud.api import deploy as deploy_flow
+from jcloud.flow import CloudFlow
 from jina import Flow
 
 from datastore.executor.docarray_v1 import DocArrayDataStore
@@ -125,12 +127,25 @@ def index(
 
 
 @app.command()
+def delete(plugin_id: str):
+    flow_id = 'retrieval-plugin-' + plugin_id
+    CloudFlow(flow_id=flow_id).__exit__()
+    print(f'Plugin {plugin_id} was successfully deleted')
+
+
+@app.command()
 def configure(
     name: str = typer.Option(None),
     description: str = typer.Option(None),
     email: str = typer.Option(None),
     info_url: str = typer.Option(None),
+    reset: bool = typer.Option(False)
 ):
+    if reset:
+        shutil.copy('.well-known/default-ai-plugin.json', '.well-known/ai-plugin.json')
+        print('Default configuration has been loaded')
+        return
+
     with open('.well-known/ai-plugin.json', 'r') as f:
         config = json.load(f)
 
@@ -175,6 +190,7 @@ def index_docs(
         )
 
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
+    # endpoint_url = 'https://chatgpt-retrieval-plugin.jina.ai/upsert'
     print(endpoint_url)
     if os.path.exists(docs):
         docs = DocumentArray.load_binary(docs)
