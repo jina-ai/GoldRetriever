@@ -32,14 +32,14 @@ from services.chunks import get_document_chunks
 from services.file import get_document_from_file
 from services.openai import get_embeddings
 
-bearer_scheme = HTTPBearer()
-BEARER_TOKEN_ENV = os.environ.get("BEARER_TOKEN")
+# bearer_scheme = HTTPBearer()
+# BEARER_TOKEN_ENV = os.environ.get("BEARER_TOKEN")
 
 
-def validate_token(bearer_token: str, credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
-    if credentials.scheme != "Bearer" or credentials.credentials != bearer_token:
-        raise HTTPException(status_code=401, detail="Invalid or missing token")
-    return credentials
+# def validate_token(bearer_token: str, credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
+#     if credentials.scheme != "Bearer" or credentials.credentials != bearer_token:
+#         raise HTTPException(status_code=401, detail="Invalid or missing token")
+#     return credentials
 
 
 def chunk_to_dadoc(chunk: DocumentChunk) -> DADoc:
@@ -85,11 +85,11 @@ def doc_to_query_result(doc: DADoc) -> QueryResult:
 
 
 class RetrievalGateway(FastAPIBaseGateway):
-    def __init__(self, bearer_token: Optional[str] = None, openai_token: str = '', **kwargs):
+    def __init__(self, openai_token: str = '', **kwargs):
         super().__init__(**kwargs)
-        self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN_ENV
-        assert self.bearer_token is not None
-        self.token_validation = functools.partial(validate_token, self.bearer_token)
+        # self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN_ENV
+        # assert self.bearer_token is not None
+        # self.token_validation = functools.partial(validate_token, self.bearer_token)
 
         if openai_token:
             os.environ["OPENAI_API_KEY"] = openai_token  # TODO(johannes): hacky, change to pass around
@@ -178,7 +178,6 @@ class RetrievalGateway(FastAPIBaseGateway):
             description="A retrieval API for querying and filtering documents based on natural language queries and metadata",
             version="1.0.0",
             servers=[{"url": self.url}],
-            dependencies=[Depends(self.token_validation)],
         )
         app.mount("/sub", sub_app)
 
@@ -190,7 +189,6 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/upsert-file",
             response_model=UpsertResponse,
-            dependencies=[Depends(self.token_validation)]
         )
         async def upsert_file(
             file: UploadFile = File(...),
@@ -209,7 +207,6 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/upsert",
             response_model=UpsertResponse,
-            dependencies=[Depends(self.token_validation)]
         )
         async def upsert(
             request: UpsertRequest = Body(...),
@@ -226,7 +223,6 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/query",
             response_model=QueryResponse,
-            dependencies=[Depends(self.token_validation)]
         )
         async def query_main(
             request: QueryRequest = Body(...),
@@ -253,7 +249,6 @@ class RetrievalGateway(FastAPIBaseGateway):
             response_model=QueryResponse,
             # NOTE: We are describing the shape of the API endpoint input due to a current limitation in parsing arrays of objects from OpenAPI schemas. This will not be necessary in the future.
             description="Accepts search query objects array each with query and optional filter. Break down complex questions into sub-questions. Refine results by criteria, e.g. time / source, don't do this often. Split queries if ResponseTooLargeError occurs.",
-            dependencies=[Depends(self.token_validation)],
         )
         async def query(
             request: QueryRequest = Body(...),
@@ -277,7 +272,6 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.delete(
             "/delete",
             response_model=DeleteResponse,
-            dependencies=[Depends(self.token_validation)]
         )
         async def delete(
             request: DeleteRequest = Body(...),

@@ -169,7 +169,7 @@ def configure(
 @app.command()
 def index_docs(
     docs: str = typer.Option,
-    bearer_token: Optional[str] = typer.Option(None),
+    # bearer_token: Optional[str] = typer.Option(None),
     flow_id: Optional[str] = typer.Option(None),
 ):
     read_envs()
@@ -181,13 +181,13 @@ def index_docs(
             "provide it through the CLI `--flow-id <your-flow-id>`"
         )
 
-    bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
-    if not bearer_token:
-        raise ValueError(
-            "No Bearer token is provided. You should either export your "
-            "token as an environment variable `RETRIEVAL_BEARER_TOKEN` or "
-            "provide it through the CLI `--bearer-token <your token>`"
-        )
+    # bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
+    # if not bearer_token:
+    #     raise ValueError(
+    #         "No Bearer token is provided. You should either export your "
+    #         "token as an environment variable `RETRIEVAL_BEARER_TOKEN` or "
+    #         "provide it through the CLI `--bearer-token <your token>`"
+    #     )
 
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
     # endpoint_url = 'https://chatgpt-retrieval-plugin.jina.ai/upsert'
@@ -203,7 +203,7 @@ def index_docs(
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {bearer_token}",
+        # "Authorization": f"Bearer {bearer_token}",
     }
     data = {"documents": []}
     for ind, doc in enumerate(docs):
@@ -253,17 +253,17 @@ def launch(bearer_token: Optional[str], openai_token: Optional[str]):
 
 @app.command()
 def deploy(
-    bearer_token: Optional[str] = typer.Option(None),
+    # bearer_token: Optional[str] = typer.Option(None),
     openai_token: Optional[str] = typer.Option(None),
 ):
     args = Namespace(force=False)
     login_jina(args)
 
     read_envs()
-    bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
-    if not bearer_token:
-        bearer_token = generate_bearer_token()
-        os.environ["RETRIEVAL_BEARER_TOKEN"] = bearer_token
+    # bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
+    # if not bearer_token:
+    #     bearer_token = generate_bearer_token()
+    #     os.environ["RETRIEVAL_BEARER_TOKEN"] = bearer_token
 
     openai_token = openai_token or os.environ.get("RETRIEVAL_OPENAI_TOKEN")
     if not openai_token:
@@ -275,21 +275,21 @@ def deploy(
 
     config_str = Path("flow.yml").read_text()
     config_str = config_str.replace("<your-openai-api-key>", openai_token)
-    config_str = config_str.replace("<your-bearer-token>", bearer_token)
+    # config_str = config_str.replace("<your-bearer-token>", bearer_token)
     tmp_config_file, tmp_config_path = tempfile.mkstemp()
     try:
         with os.fdopen(tmp_config_file, "w") as tmp:
             tmp.write(config_str)
             args = Namespace(path=tmp_config_path)
-        print(
-            f"Your Bearer token for this deployment is - {bearer_token} - "
-            f"Please store it as you will need it to interact with the plugin."
-        )
+        # print(
+        #     f"Your Bearer token for this deployment is - {bearer_token} - "
+        #     f"Please store it as you will need it to interact with the plugin."
+        # )
         flow = deploy_flow(args)
 
         write_envs(
             {
-                "RETRIEVAL_BEARER_TOKEN": bearer_token,
+                # "RETRIEVAL_BEARER_TOKEN": bearer_token,
                 "RETRIEVAL_FLOW_ID": flow.flow_id,
                 "RETRIEVAL_OPENAI_TOKEN": openai_token,
             }

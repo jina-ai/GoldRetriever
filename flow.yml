@@ -11,7 +11,6 @@ gateway:
 with:
   env:
     OPENAI_API_KEY: <your-openai-api-key>
-    BEARER_TOKEN: <your-bearer-token>
 executors:
 - name: index
   polling: "ANY"
