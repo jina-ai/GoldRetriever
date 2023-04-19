@@ -1,10 +1,10 @@
 openapi: 3.0.2
 info:
-  title: Retrieval Plugin APsI
+  title: Retrieval Plugin API
   description: A retrieval API for querying and filtering documents based on natural language queries and metadata
   version: 1.0.0
   servers:
-    - url: https://retrieval.jina.ai
+    - url: http://localhost:3333
 paths:
   /query:
     post:
@@ -30,8 +30,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HTTPValidationError"
-      security:
-        - HTTPBearer: []
 components:
   schemas:
     DocumentChunkMetadata:
@@ -190,7 +188,3 @@ components:
         type:
           title: Error Type
           type: string
-  securitySchemes:
-    HTTPBearer:
-      type: http
-      scheme: bearer

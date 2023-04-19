@@ -31,15 +31,7 @@ from models.models import (
 from services.chunks import get_document_chunks
 from services.file import get_document_from_file
 from services.openai import get_embeddings
-
-bearer_scheme = HTTPBearer()
-BEARER_TOKEN_ENV = os.environ.get("BEARER_TOKEN")
-
-
-def validate_token(bearer_token: str, credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
-    if credentials.scheme != "Bearer" or credentials.credentials != bearer_token:
-        raise HTTPException(status_code=401, detail="Invalid or missing token")
-    return credentials
+from fastapi.middleware.cors import CORSMiddleware
 
 
 def chunk_to_dadoc(chunk: DocumentChunk) -> DADoc:
@@ -85,11 +77,11 @@ def doc_to_query_result(doc: DADoc) -> QueryResult:
 
 
 class RetrievalGateway(FastAPIBaseGateway):
-    def __init__(self, bearer_token: Optional[str] = None, openai_token: str = '', **kwargs):
+    def __init__(self, openai_token: str = '', **kwargs):
         super().__init__(**kwargs)
-        self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN_ENV
-        assert self.bearer_token is not None
-        self.token_validation = functools.partial(validate_token, self.bearer_token)
+        # self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN_ENV
+        # assert self.bearer_token is not None
+        # self.token_validation = functools.partial(validate_token, self.bearer_token)
 
         if openai_token:
             os.environ["OPENAI_API_KEY"] = openai_token  # TODO(johannes): hacky, change to pass around
@@ -159,28 +151,36 @@ class RetrievalGateway(FastAPIBaseGateway):
     @property
     def app(self):
         app = FastAPI()
-        app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
-        # construct URL
-        try:
-            namespace = os.environ['K8S_NAMESPACE_NAME'].split('-')[1]
-        except:
-            raise Exception('Could not get the namespace')
+        PORT = 3333
 
-        flow_id = 'retrieval-plugin' + '-' + namespace
-        self.url = f'https://{flow_id}.wolf.jina.ai'
+        origins = [
+            f"http://localhost:{PORT}",
+            "https://chat.openai.com",
+        ]
 
-        self.modify_config_files(url='https://retrieval.jina.ai')
-
-        # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
-        sub_app = FastAPI(
-            title="Retrieval Plugin API",
-            description="A retrieval API for querying and filtering documents based on natural language queries and metadata",
-            version="1.0.0",
-            servers=[{"url": self.url}],
-            dependencies=[Depends(self.token_validation)],
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
         )
-        app.mount("/sub", sub_app)
+
+        @app.get("/.well-known/ai-plugin.json")
+        async def get_manifest(request):
+            file_path = "./local-server/ai-plugin.json"
+            return FileResponse(file_path, media_type="text/json")
+
+        @app.get("/.well-known/logo.png")
+        async def get_logo(request):
+            file_path = "./local-server/logo.png"
+            return FileResponse(file_path, media_type="text/json")
+
+        @app.get("/.well-known/openapi.yaml")
+        async def get_openapi(request):
+            file_path = "./local-server/openapi.yaml"
+            return FileResponse(file_path, media_type="text/json")
 
         @app.get("/favicon.ico")
         async def favicon():
@@ -190,7 +190,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/upsert-file",
             response_model=UpsertResponse,
-            dependencies=[Depends(self.token_validation)]
+            # dependencies=[Depends(self.token_validation)]
         )
         async def upsert_file(
             file: UploadFile = File(...),
@@ -209,7 +209,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/upsert",
             response_model=UpsertResponse,
-            dependencies=[Depends(self.token_validation)]
+            # dependencies=[Depends(self.token_validation)]
         )
         async def upsert(
             request: UpsertRequest = Body(...),
@@ -226,7 +226,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         @app.post(
             "/query",
             response_model=QueryResponse,
-            dependencies=[Depends(self.token_validation)]
+            # dependencies=[Depends(self.token_validation)]
         )
         async def query_main(
             request: QueryRequest = Body(...),
@@ -248,36 +248,10 @@ class RetrievalGateway(FastAPIBaseGateway):
                 print("Error:", e)
                 raise HTTPException(status_code=500, detail="Internal Service Error")
 
-        @sub_app.post(
-            "/query",
-            response_model=QueryResponse,
-            # NOTE: We are describing the shape of the API endpoint input due to a current limitation in parsing arrays of objects from OpenAPI schemas. This will not be necessary in the future.
-            description="Accepts search query objects array each with query and optional filter. Break down complex questions into sub-questions. Refine results by criteria, e.g. time / source, don't do this often. Split queries if ResponseTooLargeError occurs.",
-            dependencies=[Depends(self.token_validation)],
-        )
-        async def query(
-            request: QueryRequest = Body(...),
-        ):
-            try:
-                queries = request.queries
-                query_texts = [query.query for query in queries]
-                query_embeddings = get_embeddings(query_texts)
-                query_da_docs = DocumentArray(
-                    [
-                        query_to_doc(query, embedding)
-                        for query, embedding in zip(queries, query_embeddings)
-                    ]
-                )
-                results = await self.perform_query_call(query_da_docs)
-                return QueryResponse(results=results)
-            except Exception as e:
-                print("Error:", e)
-                raise HTTPException(status_code=500, detail="Internal Service Error")
-
         @app.delete(
             "/delete",
             response_model=DeleteResponse,
-            dependencies=[Depends(self.token_validation)]
+            # dependencies=[Depends(self.token_validation)]
         )
         async def delete(
             request: DeleteRequest = Body(...),
