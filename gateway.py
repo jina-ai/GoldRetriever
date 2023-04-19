@@ -8,6 +8,8 @@ import yaml
 from fastapi import FastAPI, File, HTTPException, Depends, Body, UploadFile
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 from jina.serve.runtimes.gateway.http.fastapi import FastAPIBaseGateway
 from docarray import Document as DADoc, DocumentArray
 
@@ -142,7 +144,6 @@ class RetrievalGateway(FastAPIBaseGateway):
             plugin_json = json.load(f)
 
         plugin_json['api']['url'] = plugin_json['api']['url'].replace('<your_url>', url)
-        plugin_json['logo_url'] = plugin_json['logo_url'].replace('<your_url>', url)
 
         with open('.well-known/ai-plugin.json', 'w') as f:
             json.dump(plugin_json, f, indent=2)
@@ -180,6 +181,11 @@ class RetrievalGateway(FastAPIBaseGateway):
             dependencies=[Depends(self.token_validation)],
         )
         app.mount("/sub", sub_app)
+
+        @app.get("/favicon.ico")
+        async def favicon():
+            return FileResponse(".well-known/logo.png")
+
 
         @app.post(
             "/upsert-file",

@@ -114,15 +114,15 @@ def index(
     if not os.path.exists(file):
         raise FileNotFoundError(f'{file} does not exist')
 
-    endpoint_url = f"https://{flow_id}-http.wolf.jina.ai/upsert"
+    endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert-file"
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
         "Authorization": f"Bearer {bearer_token}",
     }
-    file = {'file': open(file, 'rb')}
+    files = {'file': open(file, 'rb')}
 
-    response = requests.post(endpoint_url, headers=headers, files=file)
+    response = requests.post(endpoint_url, headers=headers, files=files)
     print(response.json())
 
 
