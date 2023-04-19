@@ -162,22 +162,22 @@ class RetrievalGateway(FastAPIBaseGateway):
         app.mount("/.well-known", StaticFiles(directory=".well-known"), name="static")
 
         # construct URL
-        try:
-            namespace = os.environ['K8S_NAMESPACE_NAME'].split('-')[1]
-        except:
-            raise Exception('Could not get the namespace')
+        # try:
+        #     namespace = os.environ['K8S_NAMESPACE_NAME'].split('-')[1]
+        # except:
+        #     raise Exception('Could not get the namespace')
 
-        flow_id = 'retrieval-plugin' + '-' + namespace
-        self.url = f'https://{flow_id}.wolf.jina.ai'
-
-        self.modify_config_files(url='https://retrieval.jina.ai')
+        # flow_id = 'retrieval-plugin' + '-' + namespace
+        # self.url = f'https://{flow_id}.wolf.jina.ai'
+        #
+        # self.modify_config_files(url='https://retrieval.jina.ai')
 
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
         sub_app = FastAPI(
             title="Retrieval Plugin API",
             description="A retrieval API for querying and filtering documents based on natural language queries and metadata",
             version="1.0.0",
-            servers=[{"url": self.url}],
+            servers=[{"url": 'http://0.0.0.0:12345'}],
         )
         app.mount("/sub", sub_app)
 
@@ -227,6 +227,8 @@ class RetrievalGateway(FastAPIBaseGateway):
         async def query_main(
             request: QueryRequest = Body(...),
         ):
+            print('shemovedi')
+            print(request)
             try:
                 queries = request.queries
                 query_texts = [query.query for query in queries]
@@ -253,6 +255,9 @@ class RetrievalGateway(FastAPIBaseGateway):
         async def query(
             request: QueryRequest = Body(...),
         ):
+            print('aqac')
+            print(request)
+
             try:
                 queries = request.queries
                 query_texts = [query.query for query in queries]

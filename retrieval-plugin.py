@@ -66,14 +66,14 @@ def read_envs():
 
 
 @app.command()
-def launch_no_docker(bearer_token: Optional[str], openai_token: Optional[str]):
+def launch_no_docker(openai_token: Optional[str]):
     flow = (
         Flow()
         .config_gateway(
             uses=RetrievalGateway,
             port=12345,
             protocol="http",
-            uses_with={"bearer_token": bearer_token, "openai_token": openai_token},
+            uses_with={"openai_token": openai_token},
         )
         .add(uses=DocArrayDataStore)
     )
@@ -86,6 +86,31 @@ def create_eventloop():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     return asyncio.get_event_loop()
+
+
+@app.command()
+def query(query: str,
+      flow_id: Optional[str] = typer.Option(None)):
+    # endpoint_url = f"https://retrieval-plugin-c201dadc28.wolf.jina.ai/query"
+    endpoint_url = 'http://0.0.0.0:12345/query'
+    print(endpoint_url)
+    headers = {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        # 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+    }
+
+    data = {
+        'queries': [
+            {
+                'query': query,
+                'top_k': 1
+            }
+        ]
+    }
+
+    response = requests.post(endpoint_url, headers=headers, json=data)
+    print(response.json())
 
 
 @app.command()
@@ -191,6 +216,8 @@ def index_docs(
 
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
     # endpoint_url = 'https://chatgpt-retrieval-plugin.jina.ai/upsert'
+    endpoint_url = 'http://0.0.0.0:12345/upsert'
+
     print(endpoint_url)
     if os.path.exists(docs):
         docs = DocumentArray.load_binary(docs)
