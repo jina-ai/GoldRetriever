@@ -170,7 +170,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         flow_id = 'retrieval-plugin' + '-' + namespace
         self.url = f'https://{flow_id}.wolf.jina.ai'
 
-        self.modify_config_files(url='https://retrieval.jina.ai')
+        self.modify_config_files(url=self.url)
 
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
         sub_app = FastAPI(
@@ -186,6 +186,9 @@ class RetrievalGateway(FastAPIBaseGateway):
         async def favicon():
             return FileResponse(".well-known/logo.png")
 
+        @app.get("/openapi.yaml")
+        async def read_openapi_yaml():
+            return FileResponse(".well-known/openapi.yaml")
 
         @app.post(
             "/upsert-file",

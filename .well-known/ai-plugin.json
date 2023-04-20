@@ -10,7 +10,7 @@
   },
   "api": {
     "type": "openapi",
-    "url": "<your_url>/.well-known/openapi.yaml",
+    "url": "<your_url>/openapi.yaml",
     "has_user_authentication": false
   },
   "logo_url": "https://jina.ai/favicon-96x96.png",
