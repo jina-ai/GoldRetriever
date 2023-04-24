@@ -144,6 +144,8 @@ class RetrievalGateway(FastAPIBaseGateway):
             plugin_json = json.load(f)
 
         plugin_json['api']['url'] = plugin_json['api']['url'].replace('<your_url>', url)
+        plugin_json['logo_url'] = plugin_json['logo_url'].replace('<your_url>', url)
+
 
         with open('.well-known/ai-plugin.json', 'w') as f:
             json.dump(plugin_json, f, indent=2)

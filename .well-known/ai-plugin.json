@@ -10,10 +10,10 @@
   },
   "api": {
     "type": "openapi",
-    "url": "<your_url>/openapi.yaml",
+    "url": "<your_url>/.well-known/openapi.yaml",
     "has_user_authentication": false
   },
-  "logo_url": "https://jina.ai/favicon-96x96.png",
-  "contact_email": "saba.sturua@jina.ai",
-  "legal_info_url": "https://jina.ai/legal/"
+  "logo_url": "<your_url>/.well-known/logo.png",
+  "contact_email": "hello@contact.com",
+  "legal_info_url": "hello@legal.com"
 }

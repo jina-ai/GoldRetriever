@@ -82,12 +82,6 @@ def launch_no_docker(bearer_token: Optional[str], openai_token: Optional[str]):
         flow.block()
 
 
-def create_eventloop():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    return asyncio.get_event_loop()
-
-
 @app.command()
 def index(
     file: str = typer.Option,
@@ -167,6 +161,49 @@ def configure(
 
 
 @app.command()
+def query(
+    query: str,
+    flow_id: Optional[str] = typer.Option(None),
+    bearer_token: Optional[str] = typer.Option(None),
+):
+    read_envs()
+    flow_id = flow_id or os.environ["RETRIEVAL_FLOW_ID"]
+    if not flow_id:
+        raise ValueError(
+            "Flow ID is not provided. You should either export your "
+            "flow ID as an environment variable `RETRIEVAL_FLOW_ID` or "
+            "provide it through the CLI `--flow-id <your-flow-id>`"
+        )
+
+    bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
+    if not bearer_token:
+        raise ValueError(
+            "No Bearer token is provided. You should either export your "
+            "token as an environment variable `RETRIEVAL_BEARER_TOKEN` or "
+            "provide it through the CLI `--bearer-token <your token>`"
+        )
+
+    endpoint_url = f"https://{flow_id}.wolf.jina.ai/query"
+    print(query, 'to', endpoint_url)
+    headers = {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        "Authorization": f"Bearer {bearer_token}",
+    }
+    data = {
+        'queries': [
+            {
+                'query': query,
+                'top_k': 1
+            }
+        ]
+    }
+
+    response = requests.post(endpoint_url, headers=headers, json=data)
+    print(response.json())
+
+
+@app.command()
 def index_docs(
     docs: str = typer.Option,
     bearer_token: Optional[str] = typer.Option(None),
@@ -190,8 +227,6 @@ def index_docs(
         )
 
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
-    # endpoint_url = 'https://chatgpt-retrieval-plugin.jina.ai/upsert'
-    print(endpoint_url)
     if os.path.exists(docs):
         docs = DocumentArray.load_binary(docs)
     else:
