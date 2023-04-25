@@ -1,4 +1,3 @@
-import asyncio
 import glob
 import json
 import mimetypes
@@ -118,6 +117,7 @@ def check_openai_key(openai_key: Optional[str]):
             "key as an environment variable `RETRIEVAL_OPENAI_KEY` or "
             "provide it through the CLI `--openai-key <your key>`"
         )
+    return openai_key
 
 
 def upsert_documents(docs, bearer_token, flow_id, n_docs=5):
