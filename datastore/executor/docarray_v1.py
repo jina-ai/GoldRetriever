@@ -7,8 +7,10 @@ import asyncio
 
 class DocArrayDataStore(Executor):
     def __init__(self, **kwargs):
-        super().__init__(workspace='/datastore')
-        self._index_file_path = os.path.join(self.workspace, "retrieval_da.bin")
+        super().__init__()
+        namespace = os.environ['K8S_NAMESPACE_NAME'].split('-')[1]
+        workspace = f'/data/jnamespace-{namespace}'
+        self._index_file_path = os.path.join(workspace, "retrieval_da.bin")
 
         print(f"Index path set to {self._index_file_path}")
         try:
@@ -41,6 +43,7 @@ class DocArrayDataStore(Executor):
             if filter_query:
                 docs_to_search = self._index.find(filter_query)
             matches = docs_to_search.find(doc.embedding, top_k=doc.tags["top_k"])
+            print('number of matches', len(matches), doc.tags["top_k"])
             result_docs.append(DADoc(id=doc.id, chunks=matches))
         return result_docs
 

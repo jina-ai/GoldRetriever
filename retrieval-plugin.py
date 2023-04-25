@@ -1,3 +1,4 @@
+import asyncio
 import glob
 import json
 import mimetypes
@@ -17,10 +18,6 @@ from docarray import DocumentArray
 from hubble.api import login as login_jina
 from jcloud.api import deploy as deploy_flow
 from jcloud.flow import CloudFlow
-from jina import Flow
-
-from datastore.executor.docarray_v1 import DocArrayDataStore
-from gateway import RetrievalGateway
 
 app = typer.Typer()
 
@@ -64,23 +61,6 @@ def read_envs():
             for line in f:
                 key, value = line.strip().split("=")
                 os.environ[key] = value
-
-
-@app.command()
-def launch_no_docker(bearer_token: Optional[str], openai_key: Optional[str]):
-    flow = (
-        Flow()
-        .config_gateway(
-            uses=RetrievalGateway,
-            port=12345,
-            protocol="http",
-            uses_with={"bearer_token": bearer_token, "openai_key": openai_key},
-        )
-        .add(uses=DocArrayDataStore)
-    )
-
-    with flow:
-        flow.block()
 
 
 def check_bearer_token(bearer_token: Optional[str], generate: Optional[bool] = False):
@@ -127,12 +107,12 @@ def upsert_documents(docs, bearer_token, flow_id, n_docs=5):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {bearer_token}",
     }
-    for ind in range(0, len(docs), n_docs):
+    for batch in range(0, len(docs), n_docs):
         data = {"documents": []}
-        for doc in docs[ind : ind + n_docs]:
+        for ind, doc in enumerate(docs[batch : batch + n_docs]):
             data["documents"].append(
                 {
-                    "id": str(ind),
+                    "id": str(batch+ind),
                     "text": doc.text,
                     "metadata": {
                         "source": doc.tags.get("source", "email"),
@@ -206,11 +186,37 @@ def index(
         upsert_files(files, bearer_token, flow_id)
 
 
+def create_eventloop():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    return asyncio.get_event_loop()
+
+
+def get_flows():
+    phases = 'Serving,Failed,Pending,Starting,Updating,Paused'
+    loop = create_eventloop()
+    jflows = loop.run_until_complete(CloudFlow().list_all(phase=phases))['flows']
+    retrieval_flows = [flow for flow in jflows if 'retrieval-plugin' in flow['id']]
+    return retrieval_flows
+
+
+@app.command()
+def list():
+    jflows = get_flows()
+    for flow in jflows:
+        id = flow['id'].split('-')[-1]
+        print(f"Plugin ID: {id} | Status: {flow['status']['phase']}")
+
+
 @app.command()
 def delete(plugin_id: str):
     flow_id = "retrieval-plugin-" + plugin_id
-    CloudFlow(flow_id=flow_id).__exit__()
-    print(f"Plugin {plugin_id} was successfully deleted")
+    jflow_ids = [flow['id'] for flow in get_flows()]
+    if flow_id in jflow_ids:
+        CloudFlow(flow_id=flow_id).__exit__()
+        print(f"Plugin {plugin_id} was successfully deleted")
+    else:
+        print(f"Plugin {plugin_id} does not exist")
 
 
 @app.command()
@@ -270,32 +276,6 @@ def query(
     results = response.json()["results"][0]["results"]
     for res in results:
         print(res["id"], res["text"])
-
-
-@app.command()
-def launch(bearer_token: Optional[str], openai_key: Optional[str]):
-    read_envs()
-    bearer_token = check_bearer_token(bearer_token, generate=True)
-    openai_key = check_openai_key(openai_key)
-
-    try:
-        flow = (
-            Flow()
-            .config_gateway(
-                uses="docker://plugin-gateway-two",
-                port=12345,
-                protocol="http",
-                env={"OPENAI_API_KEY": openai_key, "BEARER_TOKEN": bearer_token},
-            )
-            .add(uses="docker://gpt-plugin-indexer")
-        )
-    except Exception as e:
-        print(
-            "Did you build the docker images? You can also use the `launch_no_docker` command to run without docker."
-        )
-        raise e
-    with flow:
-        flow.block()
 
 
 @app.command()
