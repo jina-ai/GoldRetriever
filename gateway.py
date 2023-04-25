@@ -59,7 +59,7 @@ def dadoc_to_chunk_with_score(doc: DADoc):
         id=doc.id,
         text=doc.text,
         metadata=doc.tags,
-        embedding=list(doc.embedding),
+        embedding=None,
     )
 
 
@@ -171,7 +171,6 @@ class RetrievalGateway(FastAPIBaseGateway):
 
         flow_id = 'retrieval-plugin' + '-' + namespace
         self.url = f'https://{flow_id}.wolf.jina.ai'
-
         self.modify_config_files(url=self.url)
 
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally

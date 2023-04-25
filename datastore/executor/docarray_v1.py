@@ -7,12 +7,9 @@ import asyncio
 
 class DocArrayDataStore(Executor):
     def __init__(self, **kwargs):
-        super().__init__()
-        self._index_file_path = (
-            os.path.join(self.workspace, "retrieval_da.bin")
-            if self.workspace
-            else "retrieval_da.bin"
-        )
+        super().__init__(workspace='/datastore')
+        self._index_file_path = os.path.join(self.workspace, "retrieval_da.bin")
+
         print(f"Index path set to {self._index_file_path}")
         try:
             self._index = DocumentArray.load_binary(self._index_file_path)
