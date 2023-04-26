@@ -22,6 +22,18 @@ from jcloud.flow import CloudFlow
 app = typer.Typer()
 
 
+class UnsupportedExtensionError(Exception):
+    pass
+
+
+class EmptyDirectoryError(Exception):
+    pass
+
+
+class DataSourceNotFoundError(Exception):
+    pass
+
+
 def random_string(size=16):
     return "".join(
         random.SystemRandom().choice(string.ascii_uppercase + string.digits)
@@ -86,6 +98,8 @@ def check_flow_id(flow_id: Optional[str]):
             "flow ID as an environment variable `RETRIEVAL_FLOW_ID` or "
             "provide it through the CLI `--flow-id <your-flow-id>`"
         )
+    elif "retrieval-plugin" not in flow_id:
+        flow_id = f"retrieval-plugin-{flow_id}"
     return flow_id
 
 
@@ -101,6 +115,7 @@ def check_openai_key(openai_key: Optional[str]):
 
 
 def upsert_documents(docs, bearer_token, flow_id, n_docs=5):
+    print(f"Indexing documents into {flow_id}")
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
     headers = {
         "accept": "application/json",
@@ -112,7 +127,7 @@ def upsert_documents(docs, bearer_token, flow_id, n_docs=5):
         for ind, doc in enumerate(docs[batch : batch + n_docs]):
             data["documents"].append(
                 {
-                    "id": str(batch+ind),
+                    "id": str(batch + ind),
                     "text": doc.text,
                     "metadata": {
                         "source": doc.tags.get("source", "email"),
@@ -124,29 +139,35 @@ def upsert_documents(docs, bearer_token, flow_id, n_docs=5):
                 }
             )
         response = requests.post(endpoint_url, headers=headers, json=data)
-        print(response.json())
+        if response.status_code != 200:
+            print("Could not index the documents")
+            print(response.text)
 
 
-def upsert_files(files, bearer_token, flow_id, n_docs=5):
+def upsert_files(files, bearer_token, flow_id):
+    print(f"Indexing files into {flow_id}")
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert-file"
     headers = {
         "Authorization": f"Bearer {bearer_token}",
     }
     for file in files:
+        print(f"Indexing {file}")
         files = {"file": (file, open(file, "rb"), mimetypes.guess_type(file)[0])}
         response = requests.post(endpoint_url, headers=headers, files=files)
-        print(response.json())
+        if response.status_code != 200:
+            print("Could not index the file")
+            print(response.text)
 
 
 @app.command()
 def index(
     data: str = typer.Option,
     bearer_token: Optional[str] = typer.Option(None),
-    flow_id: Optional[str] = typer.Option(None),
+    id: Optional[str] = typer.Option(None),
 ):
     read_envs()
     bearer_token = check_bearer_token(bearer_token)
-    flow_id = check_flow_id(flow_id)
+    flow_id = check_flow_id(id)
 
     docs, files = DocumentArray(), []
 
@@ -159,7 +180,7 @@ def index(
         elif extension in [".txt", ".pdf", ".docx", ".pptx", ".md"]:
             files.append(data)
         else:
-            raise ValueError(
+            raise UnsupportedExtensionError(
                 f"Can not send {extension} file. Supported extensions: text data [txt, pdf, docx, pptx, md], docarray file [.bin]"
             )
 
@@ -173,11 +194,16 @@ def index(
             elif extension in [".txt", ".pdf", ".docx", ".pptx", ".md"]:
                 files.append(file)
 
-    else:
-        docs = DocumentArray.pull(data)
+        if not docs and not files:
+            raise EmptyDirectoryError(
+                f"{data} does not contain neither text data [txt, pdf, docx, pptx, md] nor docarray files [.bin]"
+            )
 
-    if not docs and not files:
-        raise ValueError("Could not find any documents.")
+    else:
+        try:
+            docs = DocumentArray.pull(data)
+        except:
+            raise DataSourceNotFoundError(f"Could not find {data}")
 
     if docs:
         upsert_documents(docs, bearer_token, flow_id)
@@ -193,10 +219,10 @@ def create_eventloop():
 
 
 def get_flows():
-    phases = 'Serving,Failed,Pending,Starting,Updating,Paused'
+    phases = "Serving,Failed,Pending,Starting,Updating,Paused"
     loop = create_eventloop()
-    jflows = loop.run_until_complete(CloudFlow().list_all(phase=phases))['flows']
-    retrieval_flows = [flow for flow in jflows if 'retrieval-plugin' in flow['id']]
+    jflows = loop.run_until_complete(CloudFlow().list_all(phase=phases))["flows"]
+    retrieval_flows = [flow for flow in jflows if "retrieval-plugin" in flow["id"]]
     return retrieval_flows
 
 
@@ -204,19 +230,19 @@ def get_flows():
 def list():
     jflows = get_flows()
     for flow in jflows:
-        id = flow['id'].split('-')[-1]
+        id = flow["id"].split("-")[-1]
         print(f"Plugin ID: {id} | Status: {flow['status']['phase']}")
 
 
 @app.command()
 def delete(plugin_id: str):
     flow_id = "retrieval-plugin-" + plugin_id
-    jflow_ids = [flow['id'] for flow in get_flows()]
+    jflow_ids = [flow["id"] for flow in get_flows()]
     if flow_id in jflow_ids:
         CloudFlow(flow_id=flow_id).__exit__()
-        print(f"Plugin {plugin_id} was successfully deleted")
+        print(f"{plugin_id} was successfully deleted")
     else:
-        print(f"Plugin {plugin_id} does not exist")
+        print(f"{plugin_id} does not exist")
 
 
 @app.command()
@@ -255,15 +281,14 @@ def configure(
 @app.command()
 def query(
     query: str,
-    flow_id: Optional[str] = typer.Option(None),
+    id: Optional[str] = typer.Option(None),
     bearer_token: Optional[str] = typer.Option(None),
 ):
     read_envs()
     bearer_token = check_bearer_token(bearer_token)
-    flow_id = check_flow_id(flow_id)
-
+    flow_id = check_flow_id(id)
+    print(f'Querying "{query}" to {flow_id}')
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/query"
-    print(query, "to", endpoint_url)
     headers = {
         "accept": "application/json",
         "Content-Type": "application/json",
@@ -272,23 +297,23 @@ def query(
     data = {"queries": [{"query": query, "top_k": 1}]}
 
     response = requests.post(endpoint_url, headers=headers, json=data)
-    print(response.json())
-    results = response.json()["results"][0]["results"]
-    for res in results:
-        print(res["id"], res["text"])
+    if response.json()["results"]:
+        results = response.json()["results"][0]["results"]
+        for ind, res in enumerate(results):
+            print(ind, res["text"][:150] + "...")
 
 
 @app.command()
 def deploy(
     bearer_token: Optional[str] = typer.Option(None),
-    openai_key: Optional[str] = typer.Option(None),
+    key: Optional[str] = typer.Option(None),
 ):
     args = Namespace(force=False)
     login_jina(args)
 
     read_envs()
     bearer_token = check_bearer_token(bearer_token, generate=True)
-    openai_key = check_openai_key(openai_key)
+    openai_key = check_openai_key(key)
 
     config_str = Path("flow.yml").read_text()
     config_str = config_str.replace("<your-openai-api-key>", openai_key)
