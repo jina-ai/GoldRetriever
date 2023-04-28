@@ -75,7 +75,7 @@ def read_envs():
                 os.environ[key] = value
 
 
-def check_bearer_token(bearer_token: Optional[str], generate: Optional[bool] = False):
+def check_bearer_token(bearer_token: Optional[str] = None, generate: Optional[bool] = False):
     bearer_token = bearer_token or os.environ.get("RETRIEVAL_BEARER_TOKEN")
     if not bearer_token:
         if generate:
@@ -90,8 +90,8 @@ def check_bearer_token(bearer_token: Optional[str], generate: Optional[bool] = F
     return bearer_token
 
 
-def check_flow_id(flow_id: Optional[str]):
-    flow_id = flow_id or os.environ["RETRIEVAL_FLOW_ID"]
+def check_flow_id(flow_id: Optional[str] = None):
+    flow_id = flow_id or os.environ.get("RETRIEVAL_FLOW_ID")
     if not flow_id:
         raise ValueError(
             "Flow ID is not provided. You should either export your "
@@ -103,7 +103,7 @@ def check_flow_id(flow_id: Optional[str]):
     return flow_id
 
 
-def check_openai_key(openai_key: Optional[str]):
+def check_openai_key(openai_key: Optional[str] = None):
     openai_key = openai_key or os.environ.get("RETRIEVAL_OPENAI_KEY")
     if not openai_key:
         raise ValueError(
