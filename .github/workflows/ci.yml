@@ -14,21 +14,20 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Clear Python cache
+    - name: Install Python 3.10
       run: |
-        sudo rm -rf /opt/hostedtoolcache/*/*/*/bin/python*
+        sudo apt-get update
+        sudo apt-get install -y python3.10
 
-    - name: Set up Python
-      uses: actions/setup-python@v2.2.2
-      with:
-        python-version: 3.10
-
-    - name: Install dependencies
+    - name: Set up Python environment
       run: |
+        python3.10 -m venv .venv
+        source .venv/bin/activate
         python -m pip install --upgrade pip
         pip install poetry
         poetry install --no-root
 
     - name: Run tests
       run: |
+        source .venv/bin/activate
         poetry run pytest tests/
