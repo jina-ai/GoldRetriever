@@ -1,18 +1,18 @@
-name: CI
+name: Continuous Deployment
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
 
 jobs:
-  test:
+  test_and_release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - name: Check out repository
+      uses: actions/checkout@v2
 
     - name: Install Python 3.10
       run: |
@@ -43,3 +43,12 @@ jobs:
         poetry run pytest tests/
       env:
         RETRIEVAL_OPENAI_KEY: ${{ secrets.RETRIEVAL_OPENAI_KEY }}
+
+    - name: Release to PyPI
+      if: ${{ success() }}
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+      env:
+        RELEASE_TAG: ${{ github.event.inputs.release_tag }}

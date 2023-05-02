@@ -66,6 +66,7 @@ def write_envs(new_envs):
     with open(".env", "w") as f:
         for key, value in env_vars.items():
             f.write(f"{key}={value}\n")
+            os.environ[key] = value
 
 
 def read_envs():
@@ -99,7 +100,7 @@ def check_flow_id(flow_id: Optional[str] = None):
             "flow ID as an environment variable `RETRIEVAL_FLOW_ID` or "
             "provide it through the CLI `--flow-id <your-flow-id>`"
         )
-    elif "retrieval-plugin" not in flow_id:
+    elif "retrieval" not in flow_id:
         flow_id = f"retrieval-plugin-{flow_id}"
     return flow_id
 
@@ -237,8 +238,8 @@ def list():
 
 @app.command()
 def delete(plugin_id: str):
-    flow_id = "retrieval-plugin-" + plugin_id if 'retrieval-plugin' not in plugin_id else plugin_id
-    jflow_ids = [flow["id"] for flow in get_flows()]
+    flow_id = "retrieval-plugin-" + plugin_id if 'retrieval' not in plugin_id else plugin_id
+    jflow_ids = [flow["id"] for flow in get_flows(keyword='retrieval')]
     if flow_id in jflow_ids:
         CloudFlow(flow_id=flow_id).__exit__()
         print(f"{plugin_id} was successfully deleted")
@@ -298,10 +299,12 @@ def query(
     data = {"queries": [{"query": query, "top_k": 1}]}
 
     response = requests.post(endpoint_url, headers=headers, json=data)
-    if response.json()["results"]:
+    if 'results' in response.json():
         results = response.json()["results"][0]["results"]
         for ind, res in enumerate(results):
             print(ind, res["text"][:150] + "...")
+    else:
+        print(response.json())
 
 
 @app.command()
