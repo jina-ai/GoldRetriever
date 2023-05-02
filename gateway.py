@@ -87,6 +87,8 @@ def doc_to_query_result(doc: DADoc) -> QueryResult:
 class RetrievalGateway(FastAPIBaseGateway):
     def __init__(self, bearer_token: Optional[str] = None, openai_token: str = '', **kwargs):
         super().__init__(**kwargs)
+        self.plugin_description = kwargs.get('plugin_description')
+        self.plugin_name = kwargs.get('plugin_name')
         self.bearer_token = bearer_token if bearer_token is not None else BEARER_TOKEN_ENV
         assert self.bearer_token is not None
         self.token_validation = functools.partial(validate_token, self.bearer_token)
@@ -137,15 +139,17 @@ class RetrievalGateway(FastAPIBaseGateway):
                 return True
         return False
 
-    @staticmethod
-    def modify_config_files(url):
+    def modify_config_files(self):
         # replace placeholder URL in the configuration
         with open('.well-known/ai-plugin.json', 'r') as f:
             plugin_json = json.load(f)
 
-        plugin_json['api']['url'] = plugin_json['api']['url'].replace('<your_url>', url)
-        plugin_json['logo_url'] = plugin_json['logo_url'].replace('<your_url>', url)
-
+        plugin_json['api']['url'] = plugin_json['api']['url'].replace('<your_url>', self.url)
+        plugin_json['logo_url'] = plugin_json['logo_url'].replace('<your_url>', self.url)
+        if self.plugin_description:
+            plugin_json['description_for_model'] = self.plugin_description
+        if self.plugin_name:
+            plugin_json['name_for_human'] = self.plugin_name
 
         with open('.well-known/ai-plugin.json', 'w') as f:
             json.dump(plugin_json, f, indent=2)
@@ -153,7 +157,7 @@ class RetrievalGateway(FastAPIBaseGateway):
         with open('.well-known/openapi.yaml', 'r') as f:
             openapi_yaml = yaml.safe_load(f)
 
-        openapi_yaml['info']['servers'] = url
+        openapi_yaml['info']['servers'] = self.url
 
         with open('.well-known/openapi.yaml', 'w') as f:
             yaml.dump(openapi_yaml, f)
@@ -171,7 +175,7 @@ class RetrievalGateway(FastAPIBaseGateway):
 
         flow_id = 'retrieval-plugin' + '-' + namespace
         self.url = f'https://{flow_id}.wolf.jina.ai'
-        self.modify_config_files(url=self.url)
+        self.modify_config_files()
 
         # Create a sub-application, in order to access just the query endpoint in an OpenAPI schema, found at http://0.0.0.0:8000/sub/openapi.json when the app is running locally
         sub_app = FastAPI(

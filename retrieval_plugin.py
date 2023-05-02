@@ -311,6 +311,8 @@ def query(
 def deploy(
     bearer_token: Optional[str] = typer.Option(None),
     key: Optional[str] = typer.Option(None),
+    description: Optional[str] = typer.Option(''),
+    name: Optional[str] = typer.Option(''),
 ):
     args = Namespace(force=False)
     login_jina(args)
@@ -322,6 +324,8 @@ def deploy(
     config_str = Path(FLOW_PATH).read_text()
     config_str = config_str.replace("<your-openai-api-key>", openai_key)
     config_str = config_str.replace("<your-bearer-token>", bearer_token)
+    config_str = config_str.replace("<plugin-description>", description)
+    config_str = config_str.replace("<plugin-name>", name)
     tmp_config_file, tmp_config_path = tempfile.mkstemp()
     try:
         with os.fdopen(tmp_config_file, "w") as tmp:
