@@ -20,6 +20,7 @@ from jcloud.api import deploy as deploy_flow
 from jcloud.flow import CloudFlow
 
 app = typer.Typer()
+FLOW_PATH = 'flow.yml'
 
 
 class UnsupportedExtensionError(Exception):
@@ -218,11 +219,11 @@ def create_eventloop():
     return asyncio.get_event_loop()
 
 
-def get_flows():
+def get_flows(keyword='retrieval-plugin'):
     phases = "Serving,Failed,Pending,Starting,Updating,Paused"
     loop = create_eventloop()
     jflows = loop.run_until_complete(CloudFlow().list_all(phase=phases))["flows"]
-    retrieval_flows = [flow for flow in jflows if "retrieval-plugin" in flow["id"]]
+    retrieval_flows = [flow for flow in jflows if keyword in flow["id"]]
     return retrieval_flows
 
 
@@ -236,7 +237,7 @@ def list():
 
 @app.command()
 def delete(plugin_id: str):
-    flow_id = "retrieval-plugin-" + plugin_id
+    flow_id = "retrieval-plugin-" + plugin_id if 'retrieval-plugin' not in plugin_id else plugin_id
     jflow_ids = [flow["id"] for flow in get_flows()]
     if flow_id in jflow_ids:
         CloudFlow(flow_id=flow_id).__exit__()
@@ -315,7 +316,7 @@ def deploy(
     bearer_token = check_bearer_token(bearer_token, generate=True)
     openai_key = check_openai_key(key)
 
-    config_str = Path("flow.yml").read_text()
+    config_str = Path(FLOW_PATH).read_text()
     config_str = config_str.replace("<your-openai-api-key>", openai_key)
     config_str = config_str.replace("<your-bearer-token>", bearer_token)
     tmp_config_file, tmp_config_path = tempfile.mkstemp()
