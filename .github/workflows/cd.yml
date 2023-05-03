@@ -24,7 +24,7 @@ jobs:
         python3.10 -m venv .venv
         source .venv/bin/activate
         python -m pip install --upgrade pip
-        pip install poetry
+        pip install poetry twine wheel
         poetry install --no-root
 
     - name: Add JCloud auth token
@@ -44,11 +44,10 @@ jobs:
       env:
         RETRIEVAL_OPENAI_KEY: ${{ secrets.RETRIEVAL_OPENAI_KEY }}
 
-    - name: Release to PyPI
+    - name: Build and upload package
       if: ${{ success() }}
-      uses: pypa/gh-action-pypi-publish@v1.4.2
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        poetry build
+        echo ${{ secrets.TWINE_PASSWORD }} | twine upload --repository-url https://upload.pypi.org/legacy/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }} dist/*
       env:
         RELEASE_TAG: ${{ github.event.inputs.release_tag }}
