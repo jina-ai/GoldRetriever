@@ -14,14 +14,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install Python 3.9
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3.9
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
 
     - name: Set up Python environment
       run: |
-        python3.9 -m venv .venv
+        python -m venv .venv
         source .venv/bin/activate
         python -m pip install --upgrade pip
         pip install poetry
