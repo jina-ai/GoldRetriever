@@ -25,6 +25,3 @@ def test_create_plugin():
 
     result = runner.invoke(app, ['delete', flow_id])
     assert 'was successfully deleted' in result.stdout.strip()
-
-
-
