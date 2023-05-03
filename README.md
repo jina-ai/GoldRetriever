@@ -19,6 +19,16 @@ Effortlessly create and deploy your own ChatGPT Retrieval Plugins with `auto-ret
 auto-retrieval-plugin deploy --key <your openai key>
 ```
 2. Store the "Gateway (Http)" URL and the Bearer token provided in the output.
+```bash
+╭──────────────────────── 🎉 Flow is available! ────────────────────────╮
+│                                                                       │
+│   ID               retrieval-plugin-<plugin id>                       │
+│   Gateway (Http)   https://retrieval-plugin-<plugin id>.wolf.jina.ai  │
+│   Dashboard        https://dashboard.wolf.jina.ai/flow/<plugin id>    │
+│                                                                       │
+╰───────────────────────────────────────────────────────────────────────╯
+Bearer token: <your bearer token>
+```
 
 ### Data Indexing
 1. Gather relevant text data files (PDF, TXT, DOCX, PPTX, or MD) in a directory.
@@ -48,6 +58,20 @@ auto-retrieval-plugin index --data docs.bin
 ## Advanced Usage
 
 
+### Configuration
+To tailor the plugin to your needs, change the name and description during deployment:
+```bash
+auto-retrieval-plugin deploy --key <your openai key> --name "Custom Name" --description "Custom description"
+```
+If not specified, default values will be used.
+
+| Argument    | Description                                   | Default Value                                                                                                                                                                                                                               |
+|:------------|:----------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| name        | Human-readable name, such as the full company name	  | Retrieval Plugin                                                                                                                                                                                                                            |
+| description | Description better tailored to the model, such as token context length considerations or keyword usage for improved plugin prompting                                      | Plugin for searching through the user's documents (such as files, emails, and more) to find answers to questions and retrieve relevant information. Use it whenever a user asks something that might be found in their personal information |
+
+
+
 ### Listing Plugins
 List your plugins and their status:
 ```bash
@@ -63,12 +87,6 @@ Plugin ID: ece735568f | Status: Serving
 Delete a plugin:
 ```bash
 auto-retrieval-plugin delete <plugin id>
-```
-
-### Configuration
-Customize plugin name and description during deployment:
-```bash
-auto-retrieval-plugin deploy --key <your openai key> --name "Custom Name" --description "Custom description"
 ```
 
 ### Indexing Specific Plugins
