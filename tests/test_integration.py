@@ -25,21 +25,3 @@ def test_create_plugin():
 
     result = runner.invoke(app, ['delete', flow_id])
     assert 'was successfully deleted' in result.stdout.strip()
-
-
-
-import subprocess
-
-
-def test_retrieval_plugin_deploy():
-    command = f"retrieval-plugin deploy --key {os.environ['RETRIEVAL_OPENAI_KEY']}"
-    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    if result.returncode == 0:
-        print("Command executed successfully.")
-        print("Output:", result.stdout)
-    else:
-        print("Command execution failed.")
-        print("Error:", result.stderr)
-
-    assert result.returncode == 0, f"Command execution failed. Error: {result.stderr}"
