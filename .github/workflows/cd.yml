@@ -1,0 +1,54 @@
+name: Continuous Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+
+jobs:
+  test_and_release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Install Python 3.10
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3.10
+
+    - name: Set up Python environment
+      run: |
+        python3.10 -m venv .venv
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install --no-root
+
+    - name: Add JCloud auth token
+      run: |
+        mkdir -p ~/.jina
+        touch ~/.jina/config.json
+        echo "{\"auth_token\": \"${WOLF_TOKEN}\"}" > ~/.jina/config.json
+        echo "{\"auth_token\": \"${WOLF_TOKEN}\"}" > ~/.jina/wolf.json
+        echo ~/.jina/config.json
+      env:
+        WOLF_TOKEN: ${{ secrets.WOLF_TOKEN }}
+
+    - name: Run tests
+      run: |
+        source .venv/bin/activate
+        poetry run pytest tests/
+      env:
+        RETRIEVAL_OPENAI_KEY: ${{ secrets.RETRIEVAL_OPENAI_KEY }}
+
+    - name: Release to PyPI
+      if: ${{ success() }}
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+      env:
+        RELEASE_TAG: ${{ github.event.inputs.release_tag }}

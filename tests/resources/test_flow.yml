@@ -8,6 +8,9 @@ gateway:
   port:
     - 12345
   port_monitoring: 51036
+  uses_with:
+    plugin_description: <plugin-description>
+    plugin_name: <plugin-name>
 with:
   env:
     OPENAI_API_KEY: <your-openai-api-key>

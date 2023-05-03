@@ -20,6 +20,7 @@ from jcloud.api import deploy as deploy_flow
 from jcloud.flow import CloudFlow
 
 app = typer.Typer()
+FLOW_PATH = 'flow.yml'
 
 
 class UnsupportedExtensionError(Exception):
@@ -65,6 +66,7 @@ def write_envs(new_envs):
     with open(".env", "w") as f:
         for key, value in env_vars.items():
             f.write(f"{key}={value}\n")
+            os.environ[key] = value
 
 
 def read_envs():
@@ -98,7 +100,7 @@ def check_flow_id(flow_id: Optional[str] = None):
             "flow ID as an environment variable `RETRIEVAL_FLOW_ID` or "
             "provide it through the CLI `--flow-id <your-flow-id>`"
         )
-    elif "retrieval-plugin" not in flow_id:
+    elif "retrieval" not in flow_id:
         flow_id = f"retrieval-plugin-{flow_id}"
     return flow_id
 
@@ -218,11 +220,11 @@ def create_eventloop():
     return asyncio.get_event_loop()
 
 
-def get_flows():
+def get_flows(keyword='retrieval-plugin'):
     phases = "Serving,Failed,Pending,Starting,Updating,Paused"
     loop = create_eventloop()
     jflows = loop.run_until_complete(CloudFlow().list_all(phase=phases))["flows"]
-    retrieval_flows = [flow for flow in jflows if "retrieval-plugin" in flow["id"]]
+    retrieval_flows = [flow for flow in jflows if keyword in flow["id"]]
     return retrieval_flows
 
 
@@ -236,8 +238,8 @@ def list():
 
 @app.command()
 def delete(plugin_id: str):
-    flow_id = "retrieval-plugin-" + plugin_id
-    jflow_ids = [flow["id"] for flow in get_flows()]
+    flow_id = "retrieval-plugin-" + plugin_id if 'retrieval' not in plugin_id else plugin_id
+    jflow_ids = [flow["id"] for flow in get_flows(keyword='retrieval')]
     if flow_id in jflow_ids:
         CloudFlow(flow_id=flow_id).__exit__()
         print(f"{plugin_id} was successfully deleted")
@@ -297,16 +299,20 @@ def query(
     data = {"queries": [{"query": query, "top_k": 1}]}
 
     response = requests.post(endpoint_url, headers=headers, json=data)
-    if response.json()["results"]:
+    if 'results' in response.json():
         results = response.json()["results"][0]["results"]
         for ind, res in enumerate(results):
             print(ind, res["text"][:150] + "...")
+    else:
+        print(response.json())
 
 
 @app.command()
 def deploy(
     bearer_token: Optional[str] = typer.Option(None),
     key: Optional[str] = typer.Option(None),
+    description: Optional[str] = typer.Option(''),
+    name: Optional[str] = typer.Option(''),
 ):
     args = Namespace(force=False)
     login_jina(args)
@@ -315,9 +321,11 @@ def deploy(
     bearer_token = check_bearer_token(bearer_token, generate=True)
     openai_key = check_openai_key(key)
 
-    config_str = Path("flow.yml").read_text()
+    config_str = Path(FLOW_PATH).read_text()
     config_str = config_str.replace("<your-openai-api-key>", openai_key)
     config_str = config_str.replace("<your-bearer-token>", bearer_token)
+    config_str = config_str.replace("<plugin-description>", description)
+    config_str = config_str.replace("<plugin-name>", name)
     tmp_config_file, tmp_config_path = tempfile.mkstemp()
     try:
         with os.fdopen(tmp_config_file, "w") as tmp:

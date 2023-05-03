@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Python 3.10
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3.10
+
+    - name: Set up Python environment
+      run: |
+        python3.10 -m venv .venv
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install --no-root
+
+    - name: Add JCloud auth token
+      run: |
+        mkdir -p ~/.jina
+        touch ~/.jina/config.json
+        echo "{\"auth_token\": \"${WOLF_TOKEN}\"}" > ~/.jina/config.json
+        echo "{\"auth_token\": \"${WOLF_TOKEN}\"}" > ~/.jina/wolf.json
+        echo ~/.jina/config.json
+      env:
+        WOLF_TOKEN: ${{ secrets.WOLF_TOKEN }}
+
+    - name: Run tests
+      run: |
+        source .venv/bin/activate
+        poetry run pytest tests/
+      env:
+        RETRIEVAL_OPENAI_KEY: ${{ secrets.RETRIEVAL_OPENAI_KEY }}
