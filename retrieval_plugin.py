@@ -1,10 +1,8 @@
 import asyncio
 import glob
-import json
 import mimetypes
 import os
 import random
-import shutil
 import string
 import tempfile
 from argparse import Namespace
@@ -248,39 +246,6 @@ def delete(plugin_id: str):
 
 
 @app.command()
-def configure(
-    name: str = typer.Option(None),
-    description: str = typer.Option(None),
-    email: str = typer.Option(None),
-    info_url: str = typer.Option(None),
-    reset: bool = typer.Option(False),
-):
-    if reset:
-        shutil.copy(".well-known/default-ai-plugin.json", ".well-known/ai-plugin.json")
-        print("Default configuration has been loaded")
-        return
-
-    with open(".well-known/ai-plugin.json", "r") as f:
-        config = json.load(f)
-
-    if name:
-        config["name_for_model"] = name
-    if description:
-        config["description_for_model"] = description
-    if email:
-        config["contact_email"] = email
-    if info_url:
-        config["legal_info_url"] = info_url
-
-    if name or description or email or info_url:
-        with open(".well-known/ai-plugin.json", "w") as f:
-            json.dump(config, f, indent=2)
-        print("Configuration has been successfully updated")
-    else:
-        print("Configuration has not been changed")
-
-
-@app.command()
 def query(
     query: str,
     id: Optional[str] = typer.Option(None),
@@ -331,11 +296,10 @@ def deploy(
         with os.fdopen(tmp_config_file, "w") as tmp:
             tmp.write(config_str)
             args = Namespace(path=tmp_config_path)
-        print(
-            f"Your Bearer token for this deployment is - {bearer_token} - "
-            f"Please store it as you will need it to interact with the plugin."
-        )
         flow = deploy_flow(args)
+        print(
+            f"Bearer token: {bearer_token}"
+        )
 
         write_envs(
             {
