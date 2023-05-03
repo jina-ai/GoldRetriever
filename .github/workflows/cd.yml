@@ -17,7 +17,7 @@ jobs:
     - name: Install Python 3.9
       run: |
         sudo apt-get update
-        sudo apt-get install -y python3.10
+        sudo apt-get install -y python3.9
 
     - name: Set up Python environment
       run: |
