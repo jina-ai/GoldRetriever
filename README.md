@@ -7,7 +7,7 @@ Effortlessly create and deploy your own ChatGPT Retrieval Plugins with `auto-ret
 
 ### Installation
 
-1. Ensure you have Python 3.10 or later.
+1. Ensure you have Python 3.8 or later.
 2. Install the tool via pip:
   ```bash
   pip install auto-retrieval-plugin
