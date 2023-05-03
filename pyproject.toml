@@ -23,7 +23,7 @@ python-multipart = "^0.0.6"
 arrow = "^1.2.3"
 docarray = "^0.21.0"
 jina = "^3.14.1"
-jcloud = "^0.2.5"
+jcloud = "^0.2.6"
 typer = "^0.7.0"
 pyjwt = "2.6.0"
 
