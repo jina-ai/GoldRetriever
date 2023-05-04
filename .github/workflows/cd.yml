@@ -47,6 +47,7 @@ jobs:
     - name: Build and upload package
       if: ${{ success() }}
       run: |
+        source .venv/bin/activate
         poetry build
         echo ${{ secrets.TWINE_PASSWORD }} | twine upload --repository-url https://upload.pypi.org/legacy/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }} dist/*
       env:
