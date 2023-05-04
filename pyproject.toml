@@ -27,6 +27,9 @@ jina = "^3.14.1"
 jcloud = "^0.2.6"
 typer = "^0.7.0"
 pyjwt = "2.6.0"
+requests = "^2.27.1"
+urllib3 = "^1.26.7"
+
 
 [tool.poetry.scripts]
 "auto-retrieval-plugin" = "auto_retrieval_plugin.retrieval_plugin:app"
