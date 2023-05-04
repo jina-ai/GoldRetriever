@@ -1,6 +1,6 @@
-# Auto ChatGPT Retrieval Plugin
+# Golden Retriever
 
-Effortlessly create and deploy your own ChatGPT Retrieval Plugins with `auto-retrieval-plugin`, a powerful command-line tool that takes care of hosting and server setup for you!
+Easily empower ChatGPT to store and analyze your data using `goldenretriever`, a powerful command-line tool for creating and hosting retrieval plugins in just a few simple steps.
 
 
 ## Quick Start
@@ -10,13 +10,13 @@ Effortlessly create and deploy your own ChatGPT Retrieval Plugins with `auto-ret
 1. Ensure you have Python 3.8 or later.
 2. Install the tool via pip:
   ```bash
-  pip install auto-retrieval-plugin
+  pip install goldenretriever
   ```
 
 ### Deployment
 1. Run the following command to deploy the plugin:
 ```bash
-auto-retrieval-plugin deploy --key <your openai key>
+goldenretriever deploy --key <your openai key>
 ```
 2. Store the "Gateway (Http)" URL and the Bearer token provided in the output.
 ```bash
@@ -34,7 +34,7 @@ Bearer token: <your bearer token>
 1. Gather relevant text data files (PDF, TXT, DOCX, PPTX, or MD) in a directory.
 2. Index the data:
 ```bash
-auto-retrieval-plugin index --data my_files
+goldenretriever index --data my_files
 ```
   Or, use `docarray (v0.21.0)` for text data:
 ```python
@@ -46,7 +46,7 @@ docs.save_binary('docs.bin')
 ```
 And then:
 ```bash
-auto-retrieval-plugin index --data docs.bin
+goldenretriever index --data docs.bin
 ```
 
 ### Integration
@@ -61,7 +61,7 @@ auto-retrieval-plugin index --data docs.bin
 ### Configuration
 To tailor the plugin to your needs, change the name and description during deployment:
 ```bash
-auto-retrieval-plugin deploy --key <your openai key> --name "Custom Name" --description "Custom description"
+goldenretriever deploy --key <your openai key> --name "Custom Name" --description "Custom description"
 ```
 If not specified, default values will be used.
 
@@ -75,7 +75,7 @@ If not specified, default values will be used.
 ### Listing Plugins
 List your plugins and their status:
 ```bash
-auto-retrieval-plugin list
+goldenretriever list
 ```
 
 Output:
@@ -86,12 +86,12 @@ Plugin ID: ece735568f | Status: Serving
 ### Deleting Plugins
 Delete a plugin:
 ```bash
-auto-retrieval-plugin delete <plugin id>
+goldenretriever delete <plugin id>
 ```
 
 ### Indexing Specific Plugins
 Index data for a specific plugin:
 ```bash
-auto-retrieval-plugin index --data my_files --id <plugin_id>
+goldenretriever index --data my_files --id <plugin_id>
 ```
 If the plugin ID is not specified, the last created plugin will be indexed.
