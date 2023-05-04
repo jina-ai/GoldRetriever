@@ -40,7 +40,6 @@ jobs:
     - name: Run tests
       run: |
         source .venv/bin/activate
-        export PYTHONPATH=$(pwd)
         poetry run pytest tests/
       env:
         RETRIEVAL_OPENAI_KEY: ${{ secrets.RETRIEVAL_OPENAI_KEY }}
