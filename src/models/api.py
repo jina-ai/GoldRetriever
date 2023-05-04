@@ -1,4 +1,4 @@
-from auto_retrieval_plugin.models.models import (
+from src.models.models import (
     Document,
     DocumentMetadataFilter,
     Query,

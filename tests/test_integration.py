@@ -1,13 +1,13 @@
 import os
 
 from typer.testing import CliRunner
-from auto_retrieval_plugin.retrieval_plugin import app, get_flows
+from src.retriever import app, get_flows
 from unittest.mock import patch
 
 runner = CliRunner()
 
 
-@patch('auto_retrieval_plugin.retrieval_plugin.FLOW_PATH', 'tests/resources/test_flow.yml')
+@patch('src.retriever.FLOW_PATH', 'tests/resources/test_flow.yml')
 def test_create_plugin():
     result = runner.invoke(app, ['deploy', '--key', os.environ['RETRIEVAL_OPENAI_KEY']])
     assert 'Flow is available!' in result.stdout.strip()
