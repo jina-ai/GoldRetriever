@@ -120,7 +120,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-goldenretriever/.env
+src/.env
 .venv
 env/
 venv/

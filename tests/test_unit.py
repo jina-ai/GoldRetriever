@@ -1,6 +1,6 @@
 import pytest
 import os
-from goldenretriever.retriever import check_bearer_token, check_flow_id, check_openai_key
+from src.retriever import check_bearer_token, check_flow_id, check_openai_key
 
 
 def test_check_bearer_token():

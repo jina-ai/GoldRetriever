@@ -1,4 +1,4 @@
-from goldenretriever.services.openai import get_chat_completion
+from src.services.openai import get_chat_completion
 
 
 def screen_text_for_pii(text: str) -> bool:

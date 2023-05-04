@@ -3,11 +3,11 @@ import json
 import argparse
 import asyncio
 
-from goldenretriever.models.models import Document, DocumentMetadata
-from goldenretriever.datastore.datastore import DataStore
-from goldenretriever.datastore.factory import get_datastore
-from goldenretriever.services.extract_metadata import extract_metadata_from_document
-from goldenretriever.services.pii_detection import screen_text_for_pii
+from src.models.models import Document, DocumentMetadata
+from src.datastore.datastore import DataStore
+from src.datastore.factory import get_datastore
+from src.services.extract_metadata import extract_metadata_from_document
+from src.services.pii_detection import screen_text_for_pii
 
 DOCUMENT_UPSERT_BATCH_SIZE = 50
 

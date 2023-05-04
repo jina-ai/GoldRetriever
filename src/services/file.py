@@ -8,7 +8,7 @@ import docx2txt
 import csv
 import pptx
 
-from goldenretriever.models.models import Document, DocumentMetadata, Source
+from src.models.models import Document, DocumentMetadata, Source
 
 
 async def get_document_from_file(file: UploadFile) -> Document:
