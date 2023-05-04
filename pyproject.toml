@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "auto-retrieval-plugin"
-version = "0.1.5"
+name = "goldenretriever"
+version = "0.1.0"
 description = "Create and host retrieval plugins for ChatGPT in one click"
 authors = ["saba <saba.sturua@jina.ai>", "johannes <johannes.messner@jina.ai>"]
 readme = "README.md"
-include = ["auto_retrieval_plugin/**/*"]
+include = ["src/**/*"]
 
 
 [tool.poetry.dependencies]
@@ -32,7 +32,7 @@ urllib3 = "^1.26.7"
 wheel = "^0.37.0"
 
 [tool.poetry.scripts]
-"auto-retrieval-plugin" = "auto_retrieval_plugin.retrieval_plugin:app"
+"goldenretriever" = "src.retriever:app"
 
 [tool.poetry.group.dev.dependencies]
 httpx = "^0.23.3"

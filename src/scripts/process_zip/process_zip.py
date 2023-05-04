@@ -5,12 +5,12 @@ import json
 import argparse
 import asyncio
 
-from auto_retrieval_plugin.models.models import Document, DocumentMetadata, Source
-from auto_retrieval_plugin.datastore.datastore import DataStore
-from auto_retrieval_plugin.datastore.factory import get_datastore
-from auto_retrieval_plugin.services.extract_metadata import extract_metadata_from_document
-from auto_retrieval_plugin.services.file import extract_text_from_filepath
-from auto_retrieval_plugin.services.pii_detection import screen_text_for_pii
+from src.models.models import Document, DocumentMetadata, Source
+from src.datastore.datastore import DataStore
+from src.datastore.factory import get_datastore
+from src.services.extract_metadata import extract_metadata_from_document
+from src.services.file import extract_text_from_filepath
+from src.services.pii_detection import screen_text_for_pii
 
 DOCUMENT_UPSERT_BATCH_SIZE = 50
 

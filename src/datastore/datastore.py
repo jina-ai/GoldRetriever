@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 import asyncio
 
-from auto_retrieval_plugin.models.models import (
+from src.models.models import (
     Document,
     DocumentChunk,
     DocumentMetadataFilter,
@@ -10,8 +10,8 @@ from auto_retrieval_plugin.models.models import (
     QueryResult,
     QueryWithEmbedding,
 )
-from auto_retrieval_plugin.services.chunks import get_document_chunks
-from auto_retrieval_plugin.services.openai import get_embeddings
+from src.services.chunks import get_document_chunks
+from src.services.openai import get_embeddings
 
 
 class DataStore(ABC):

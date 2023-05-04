@@ -1,5 +1,5 @@
-from auto_retrieval_plugin.models.models import Source
-from auto_retrieval_plugin.services.openai import get_chat_completion
+from src.models.models import Source
+from src.services.openai import get_chat_completion
 import json
 from typing import Dict
 

@@ -1,4 +1,4 @@
-from auto_retrieval_plugin.datastore.datastore import DataStore
+from src.datastore.datastore import DataStore
 import os
 
 
@@ -8,32 +8,32 @@ async def get_datastore() -> DataStore:
 
     match datastore:
         case "docarray":
-            from auto_retrieval_plugin.datastore.executor.docarray_v1 import DocArrayDataStore
+            from src.datastore.executor.docarray_v1 import DocArrayDataStore
 
             return DocArrayDataStore()
 
         case "pinecone":
-            from auto_retrieval_plugin.datastore import PineconeDataStore
+            from src.datastore import PineconeDataStore
 
             return PineconeDataStore()
         case "weaviate":
-            from auto_retrieval_plugin.datastore import WeaviateDataStore
+            from src.datastore import WeaviateDataStore
 
             return WeaviateDataStore()
         case "milvus":
-            from auto_retrieval_plugin.datastore import MilvusDataStore
+            from src.datastore import MilvusDataStore
 
             return MilvusDataStore()
         case "zilliz":
-            from auto_retrieval_plugin.datastore import ZillizDataStore
+            from src.datastore import ZillizDataStore
 
             return ZillizDataStore()
         case "redis":
-            from auto_retrieval_plugin.datastore import RedisDataStore
+            from src.datastore import RedisDataStore
 
             return await RedisDataStore.init()
         case "qdrant":
-            from auto_retrieval_plugin.datastore import QdrantDataStore
+            from src.datastore import QdrantDataStore
 
             return QdrantDataStore()
         case _:
