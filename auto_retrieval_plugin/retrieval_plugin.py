@@ -21,6 +21,7 @@ app = typer.Typer()
 
 current_file_path = Path(__file__).resolve()
 FLOW_PATH = current_file_path.parent / "flow.yml"
+ENV_FILE_PATH = current_file_path.parent / ".env"
 
 
 class UnsupportedExtensionError(Exception):
@@ -55,23 +56,23 @@ def generate_bearer_token():
 
 def write_envs(new_envs):
     old_envs = {}
-    if os.path.exists("../.env"):
-        with open("../.env", "r") as f:
+    if os.path.exists(ENV_FILE_PATH):
+        with open(ENV_FILE_PATH, "r") as f:
             for line in f:
                 key, value = line.strip().split("=")
                 old_envs[key] = value
 
     env_vars = {**old_envs, **new_envs}
 
-    with open("../.env", "w") as f:
+    with open(ENV_FILE_PATH, "w") as f:
         for key, value in env_vars.items():
             f.write(f"{key}={value}\n")
             os.environ[key] = value
 
 
 def read_envs():
-    if os.path.exists("../.env"):
-        with open("../.env", "r") as f:
+    if os.path.exists(ENV_FILE_PATH):
+        with open(ENV_FILE_PATH, "r") as f:
             for line in f:
                 key, value = line.strip().split("=")
                 os.environ[key] = value
