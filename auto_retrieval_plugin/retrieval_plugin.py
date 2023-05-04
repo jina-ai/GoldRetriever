@@ -18,7 +18,9 @@ from jcloud.api import deploy as deploy_flow
 from jcloud.flow import CloudFlow
 
 app = typer.Typer()
-FLOW_PATH = 'auto_retrieval_plugin/flow.yml'
+
+current_file_path = Path(__file__).resolve()
+FLOW_PATH = current_file_path.parent / "flow.yml"
 
 
 class UnsupportedExtensionError(Exception):
