@@ -1,10 +1,9 @@
 [tool.poetry]
-name = "chatgpt-retrieval-plugin"
+name = "auto-retrieval-plugin"
 version = "0.1.0"
-description = ""
-authors = ["isafulf <isabella@openai.com>"]
+description = "Create and host retrieval plugins for ChatGPT in one click"
+authors = ["saba <saba.sturua@jina.ai>", "johannes johannes.messner@jina.ai"]
 readme = "README.md"
-packages = [{include = "server"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
