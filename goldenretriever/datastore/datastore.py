@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
 import asyncio
 
-from src.models.models import (
+from goldenretriever.models.models import (
     Document,
     DocumentChunk,
     DocumentMetadataFilter,
@@ -10,8 +10,8 @@ from src.models.models import (
     QueryResult,
     QueryWithEmbedding,
 )
-from src.services.chunks import get_document_chunks
-from src.services.openai import get_embeddings
+from goldenretriever.services.chunks import get_document_chunks
+from goldenretriever.services.openai import get_embeddings
 
 
 class DataStore(ABC):

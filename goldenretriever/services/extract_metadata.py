@@ -1,5 +1,5 @@
-from src.models.models import Source
-from src.services.openai import get_chat_completion
+from goldenretriever.models.models import Source
+from goldenretriever.services.openai import get_chat_completion
 import json
 from typing import Dict
 
