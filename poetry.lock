@@ -962,25 +962,13 @@ test = ["black (==22.3.0)", "jina (>=3.7.0)", "mock", "pytest", "pytest-asyncio"
 
 [[package]]
 name = "jina"
-version = "3.15.1"
+version = "3.15.2"
 description = "Build multimodal AI services via cloud native technologies · Neural Search · Generative AI · MLOps"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "jina-3.15.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:efc4bbc5b10c5d77dafac1dcf1efd208994ef9ab741e3ac89e9340670b3a2be3"},
-    {file = "jina-3.15.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:9215a2a9082e030c0a5049f73dd1a39ee09fc9f91f8e823863e609ce3eb1141e"},
-    {file = "jina-3.15.1-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:128c883a2b5cc96cb00ae2e258e8d2156a2dc7f66764d860641d7b16daed703b"},
-    {file = "jina-3.15.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:a6a39cdac4e1e6012552a18183be98e02f05e274959694c3e782b96ceb89fcdc"},
-    {file = "jina-3.15.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:fa3b1ce11742e6520ba8e2f61f1eb1de520c8593006f6f53f34b9895c271f415"},
-    {file = "jina-3.15.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a471c76ec0f6b534356c1bf20b52d593c063c991e5128900af5572cb485d17c5"},
-    {file = "jina-3.15.1-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:49f436338b7150539b945ab703820c15eb77caf4b86fbc0debd26e71baa7e31e"},
-    {file = "jina-3.15.1-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:d53a5f6fdc96a51bcd977ae2929f32620b3cbd976d32b29b23e6ff2136f5fb1c"},
-    {file = "jina-3.15.1-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:72b1c8f1b03aef65d561f1d1089af4740563d2ed27fb023062887bf14303a445"},
-    {file = "jina-3.15.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8ab57e70a5ff68e6428769164d4bd3f8f842b1521c16ea5abad91fecc69f50b4"},
-    {file = "jina-3.15.1-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:42de2f4b901e9a2ef31cc6d581ff325787496b006be11ebd3aff335a625aefa1"},
-    {file = "jina-3.15.1-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:a8f074db2a12b07376cc4fe5e094950bf0a2337581ab61e59af87143d750797d"},
-    {file = "jina-3.15.1-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8107a28e395a339bc3d7de36bc53d49cbd88444de39ee1b68834437f2d0ffbf9"},
+    {file = "jina-3.15.2.tar.gz", hash = "sha256:41c3fbe14736edf34e69b0245410554347b209aa01f4cf8e2c65d6e3972ba0b0"},
 ]
 
 [package.dependencies]
@@ -1007,27 +995,28 @@ opentelemetry-instrumentation-grpc = ">=0.35b0"
 opentelemetry-sdk = ">=1.14.0"
 packaging = ">=20.0"
 pathspec = "*"
-prometheus-client = ">=0.12.0"
+prometheus_client = ">=0.12.0"
 protobuf = ">=3.19.0"
 pydantic = "*"
 python-multipart = "*"
 pyyaml = ">=5.3.1"
 requests = "*"
+urllib3 = "<2.0.0"
 uvicorn = {version = "*", extras = ["standard"]}
-uvloop = "*"
+uvloop = {version = "*", markers = "platform_system != \"Windows\""}
 websockets = "*"
 
 [package.extras]
 aiofiles = ["aiofiles"]
 aiohttp = ["aiohttp"]
 aiostream = ["aiostream"]
-all = ["Pillow", "aiofiles", "aiohttp", "aiostream", "black (==22.3.0)", "bs4", "coverage (==6.2)", "docarray (>=0.16.4,<0.30.0)", "docker", "fastapi (>=0.76.0)", "filelock", "flaky", "grpcio (>=1.46.0,<1.48.1)", "grpcio-health-checking (>=1.46.0,<1.48.1)", "grpcio-reflection (>=1.46.0,<1.48.1)", "jcloud (>=0.0.35)", "jina-hubble-sdk (>=0.30.4)", "jsonschema", "kubernetes (>=18.20.0)", "mock", "numpy", "opentelemetry-api (>=1.12.0)", "opentelemetry-exporter-otlp (>=1.12.0)", "opentelemetry-exporter-otlp-proto-grpc (>=1.13.0)", "opentelemetry-exporter-prometheus (>=1.12.0rc1)", "opentelemetry-instrumentation-aiohttp-client (>=0.33b0)", "opentelemetry-instrumentation-fastapi (>=0.33b0)", "opentelemetry-instrumentation-grpc (>=0.35b0)", "opentelemetry-sdk (>=1.14.0)", "opentelemetry-test-utils (>=0.33b0)", "packaging (>=20.0)", "pathspec", "portforward (>=0.2.4,<0.4.3)", "prometheus-api-client (>=0.5.1)", "prometheus-client (>=0.12.0)", "protobuf (>=3.19.0)", "psutil", "pydantic", "pytest", "pytest-asyncio", "pytest-cov (==3.0.0)", "pytest-custom-exit-code", "pytest-kind (==22.11.1)", "pytest-lazy-fixture", "pytest-mock", "pytest-repeat", "pytest-reraise", "pytest-timeout", "python-multipart", "pyyaml (>=5.3.1)", "requests", "requests-mock", "scipy (>=1.6.1)", "sgqlc", "strawberry-graphql (>=0.96.0)", "tensorflow (>=2.0)", "torch", "uvicorn[standard]", "uvloop", "watchfiles (>=0.18.0)", "websockets"]
+all = ["Pillow", "aiofiles", "aiohttp", "aiostream", "black (==22.3.0)", "bs4", "coverage (==6.2)", "docarray (>=0.16.4,<0.30.0)", "docker", "fastapi (>=0.76.0)", "filelock", "flaky", "grpcio (>=1.46.0,<1.48.1)", "grpcio-health-checking (>=1.46.0,<1.48.1)", "grpcio-reflection (>=1.46.0,<1.48.1)", "jcloud (>=0.0.35)", "jina-hubble-sdk (>=0.30.4)", "jsonschema", "kubernetes (>=18.20.0)", "mock", "numpy", "opentelemetry-api (>=1.12.0)", "opentelemetry-exporter-otlp (>=1.12.0)", "opentelemetry-exporter-otlp-proto-grpc (>=1.13.0)", "opentelemetry-exporter-prometheus (>=1.12.0rc1)", "opentelemetry-instrumentation-aiohttp-client (>=0.33b0)", "opentelemetry-instrumentation-fastapi (>=0.33b0)", "opentelemetry-instrumentation-grpc (>=0.35b0)", "opentelemetry-sdk (>=1.14.0)", "opentelemetry-test-utils (>=0.33b0)", "packaging (>=20.0)", "pathspec", "portforward (>=0.2.4,<0.4.3)", "prometheus-api-client (>=0.5.1)", "prometheus_client (>=0.12.0)", "protobuf (>=3.19.0)", "psutil", "pydantic", "pytest", "pytest-asyncio", "pytest-cov (==3.0.0)", "pytest-custom_exit_code", "pytest-kind (==22.11.1)", "pytest-lazy-fixture", "pytest-mock", "pytest-repeat", "pytest-reraise", "pytest-timeout", "python-multipart", "pyyaml (>=5.3.1)", "requests", "requests-mock", "scipy (>=1.6.1)", "sgqlc", "strawberry-graphql (>=0.96.0)", "tensorflow (>=2.0)", "torch", "urllib3 (<2.0.0)", "uvicorn[standard]", "uvloop", "watchfiles (>=0.18.0)", "websockets"]
 black = ["black (==22.3.0)"]
 bs4 = ["bs4"]
 cicd = ["bs4", "jsonschema", "portforward (>=0.2.4,<0.4.3)", "sgqlc", "strawberry-graphql (>=0.96.0)", "tensorflow (>=2.0)", "torch"]
-core = ["aiostream", "docarray (>=0.16.4,<0.30.0)", "grpcio (>=1.46.0,<1.48.1)", "grpcio-health-checking (>=1.46.0,<1.48.1)", "grpcio-reflection (>=1.46.0,<1.48.1)", "jcloud (>=0.0.35)", "jina-hubble-sdk (>=0.30.4)", "numpy", "opentelemetry-api (>=1.12.0)", "opentelemetry-instrumentation-grpc (>=0.35b0)", "packaging (>=20.0)", "protobuf (>=3.19.0)", "pyyaml (>=5.3.1)"]
+core = ["aiostream", "docarray (>=0.16.4,<0.30.0)", "grpcio (>=1.46.0,<1.48.1)", "grpcio-health-checking (>=1.46.0,<1.48.1)", "grpcio-reflection (>=1.46.0,<1.48.1)", "jcloud (>=0.0.35)", "jina-hubble-sdk (>=0.30.4)", "numpy", "opentelemetry-api (>=1.12.0)", "opentelemetry-instrumentation-grpc (>=0.35b0)", "packaging (>=20.0)", "protobuf (>=3.19.0)", "pyyaml (>=5.3.1)", "urllib3 (<2.0.0)"]
 coverage = ["coverage (==6.2)"]
-devel = ["aiofiles", "aiohttp", "docker", "fastapi (>=0.76.0)", "filelock", "opentelemetry-exporter-otlp (>=1.12.0)", "opentelemetry-exporter-otlp-proto-grpc (>=1.13.0)", "opentelemetry-exporter-prometheus (>=1.12.0rc1)", "opentelemetry-instrumentation-aiohttp-client (>=0.33b0)", "opentelemetry-instrumentation-fastapi (>=0.33b0)", "opentelemetry-sdk (>=1.14.0)", "pathspec", "prometheus-client (>=0.12.0)", "pydantic", "python-multipart", "requests", "sgqlc", "strawberry-graphql (>=0.96.0)", "uvicorn[standard]", "uvloop", "watchfiles (>=0.18.0)", "websockets"]
+devel = ["aiofiles", "aiohttp", "docker", "fastapi (>=0.76.0)", "filelock", "opentelemetry-exporter-otlp (>=1.12.0)", "opentelemetry-exporter-otlp-proto-grpc (>=1.13.0)", "opentelemetry-exporter-prometheus (>=1.12.0rc1)", "opentelemetry-instrumentation-aiohttp-client (>=0.33b0)", "opentelemetry-instrumentation-fastapi (>=0.33b0)", "opentelemetry-sdk (>=1.14.0)", "pathspec", "prometheus_client (>=0.12.0)", "pydantic", "python-multipart", "requests", "sgqlc", "strawberry-graphql (>=0.96.0)", "uvicorn[standard]", "uvloop", "watchfiles (>=0.18.0)", "websockets"]
 docarray = ["docarray (>=0.16.4,<0.30.0)"]
 docker = ["docker"]
 fastapi = ["fastapi (>=0.76.0)"]
@@ -1053,18 +1042,18 @@ opentelemetry-sdk = ["opentelemetry-sdk (>=1.14.0)"]
 opentelemetry-test-utils = ["opentelemetry-test-utils (>=0.33b0)"]
 packaging = ["packaging (>=20.0)"]
 pathspec = ["pathspec"]
-perf = ["opentelemetry-exporter-otlp (>=1.12.0)", "opentelemetry-exporter-otlp-proto-grpc (>=1.13.0)", "opentelemetry-exporter-prometheus (>=1.12.0rc1)", "opentelemetry-instrumentation-aiohttp-client (>=0.33b0)", "opentelemetry-instrumentation-fastapi (>=0.33b0)", "opentelemetry-sdk (>=1.14.0)", "prometheus-client (>=0.12.0)", "uvloop"]
+perf = ["opentelemetry-exporter-otlp (>=1.12.0)", "opentelemetry-exporter-otlp-proto-grpc (>=1.13.0)", "opentelemetry-exporter-prometheus (>=1.12.0rc1)", "opentelemetry-instrumentation-aiohttp-client (>=0.33b0)", "opentelemetry-instrumentation-fastapi (>=0.33b0)", "opentelemetry-sdk (>=1.14.0)", "prometheus_client (>=0.12.0)", "uvloop"]
 pillow = ["Pillow"]
 portforward = ["portforward (>=0.2.4,<0.4.3)"]
 prometheus-api-client = ["prometheus-api-client (>=0.5.1)"]
-prometheus-client = ["prometheus-client (>=0.12.0)"]
+prometheus-client = ["prometheus_client (>=0.12.0)"]
 protobuf = ["protobuf (>=3.19.0)"]
 psutil = ["psutil"]
 pydantic = ["pydantic"]
 pytest = ["pytest"]
 pytest-asyncio = ["pytest-asyncio"]
 pytest-cov = ["pytest-cov (==3.0.0)"]
-pytest-custom-exit-code = ["pytest-custom-exit-code"]
+pytest-custom-exit-code = ["pytest-custom_exit_code"]
 pytest-kind = ["pytest-kind (==22.11.1)"]
 pytest-lazy-fixture = ["pytest-lazy-fixture"]
 pytest-mock = ["pytest-mock"]
@@ -1077,13 +1066,14 @@ requests = ["requests"]
 requests-mock = ["requests-mock"]
 scipy = ["scipy (>=1.6.1)"]
 sgqlc = ["sgqlc"]
-standard = ["aiofiles", "aiohttp", "docker", "fastapi (>=0.76.0)", "filelock", "opentelemetry-exporter-otlp (>=1.12.0)", "opentelemetry-exporter-prometheus (>=1.12.0rc1)", "opentelemetry-instrumentation-aiohttp-client (>=0.33b0)", "opentelemetry-instrumentation-fastapi (>=0.33b0)", "opentelemetry-sdk (>=1.14.0)", "pathspec", "prometheus-client (>=0.12.0)", "pydantic", "python-multipart", "requests", "uvicorn[standard]", "uvloop", "websockets"]
+standard = ["aiofiles", "aiohttp", "docker", "fastapi (>=0.76.0)", "filelock", "opentelemetry-exporter-otlp (>=1.12.0)", "opentelemetry-exporter-prometheus (>=1.12.0rc1)", "opentelemetry-instrumentation-aiohttp-client (>=0.33b0)", "opentelemetry-instrumentation-fastapi (>=0.33b0)", "opentelemetry-sdk (>=1.14.0)", "pathspec", "prometheus_client (>=0.12.0)", "pydantic", "python-multipart", "requests", "uvicorn[standard]", "uvloop", "websockets"]
 standrad = ["opentelemetry-exporter-otlp-proto-grpc (>=1.13.0)"]
 strawberry-graphql = ["strawberry-graphql (>=0.96.0)"]
 tensorflow = ["tensorflow (>=2.0)"]
-test = ["Pillow", "black (==22.3.0)", "coverage (==6.2)", "flaky", "kubernetes (>=18.20.0)", "mock", "opentelemetry-test-utils (>=0.33b0)", "prometheus-api-client (>=0.5.1)", "psutil", "pytest", "pytest-asyncio", "pytest-cov (==3.0.0)", "pytest-custom-exit-code", "pytest-kind (==22.11.1)", "pytest-lazy-fixture", "pytest-mock", "pytest-repeat", "pytest-reraise", "pytest-timeout", "requests-mock", "scipy (>=1.6.1)"]
+test = ["Pillow", "black (==22.3.0)", "coverage (==6.2)", "flaky", "kubernetes (>=18.20.0)", "mock", "opentelemetry-test-utils (>=0.33b0)", "prometheus-api-client (>=0.5.1)", "psutil", "pytest", "pytest-asyncio", "pytest-cov (==3.0.0)", "pytest-custom_exit_code", "pytest-kind (==22.11.1)", "pytest-lazy-fixture", "pytest-mock", "pytest-repeat", "pytest-reraise", "pytest-timeout", "requests-mock", "scipy (>=1.6.1)"]
 torch = ["torch"]
-uvicorn-standard- = ["uvicorn[standard]"]
+urllib3 = ["urllib3 (<2.0.0)"]
+"uvicorn[standard" = ["uvicorn[standard]"]
 uvloop = ["uvloop"]
 watchfiles = ["watchfiles (>=0.18.0)"]
 websockets = ["websockets"]

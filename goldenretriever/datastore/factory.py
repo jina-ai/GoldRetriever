@@ -1,4 +1,4 @@
-from src.datastore.datastore import DataStore
+from goldenretriever.datastore.datastore import DataStore
 import os
 
 
@@ -8,32 +8,32 @@ async def get_datastore() -> DataStore:
 
     match datastore:
         case "docarray":
-            from src.datastore.executor.docarray_v1 import DocArrayDataStore
+            from goldenretriever.datastore.executor.docarray_v1 import DocArrayDataStore
 
             return DocArrayDataStore()
 
         case "pinecone":
-            from src.datastore import PineconeDataStore
+            from goldenretriever.datastore import PineconeDataStore
 
             return PineconeDataStore()
         case "weaviate":
-            from src.datastore import WeaviateDataStore
+            from goldenretriever.datastore import WeaviateDataStore
 
             return WeaviateDataStore()
         case "milvus":
-            from src.datastore import MilvusDataStore
+            from goldenretriever.datastore import MilvusDataStore
 
             return MilvusDataStore()
         case "zilliz":
-            from src.datastore import ZillizDataStore
+            from goldenretriever.datastore import ZillizDataStore
 
             return ZillizDataStore()
         case "redis":
-            from src.datastore import RedisDataStore
+            from goldenretriever.datastore import RedisDataStore
 
             return await RedisDataStore.init()
         case "qdrant":
-            from src.datastore import QdrantDataStore
+            from goldenretriever.datastore import QdrantDataStore
 
             return QdrantDataStore()
         case _:
