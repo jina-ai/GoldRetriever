@@ -5,12 +5,12 @@ import json
 import argparse
 import asyncio
 
-from goldenretriever.models.models import Document, DocumentMetadata, Source
-from goldenretriever.datastore.datastore import DataStore
-from goldenretriever.datastore.factory import get_datastore
-from goldenretriever.services.extract_metadata import extract_metadata_from_document
-from goldenretriever.services.file import extract_text_from_filepath
-from goldenretriever.services.pii_detection import screen_text_for_pii
+from goldretriever.models.models import Document, DocumentMetadata, Source
+from goldretriever.datastore.datastore import DataStore
+from goldretriever.datastore.factory import get_datastore
+from goldretriever.services.extract_metadata import extract_metadata_from_document
+from goldretriever.services.file import extract_text_from_filepath
+from goldretriever.services.pii_detection import screen_text_for_pii
 
 DOCUMENT_UPSERT_BATCH_SIZE = 50
 

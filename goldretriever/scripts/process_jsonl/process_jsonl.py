@@ -1,27 +1,26 @@
-import uuid
 import json
 import argparse
 import asyncio
 
-from goldenretriever.models.models import Document, DocumentMetadata
-from goldenretriever.datastore.datastore import DataStore
-from goldenretriever.datastore.factory import get_datastore
-from goldenretriever.services.extract_metadata import extract_metadata_from_document
-from goldenretriever.services.pii_detection import screen_text_for_pii
+from goldretriever.models.models import Document, DocumentMetadata
+from goldretriever.datastore.datastore import DataStore
+from goldretriever.datastore.factory import get_datastore
+from goldretriever.services.extract_metadata import extract_metadata_from_document
+from goldretriever.services.pii_detection import screen_text_for_pii
 
 DOCUMENT_UPSERT_BATCH_SIZE = 50
 
 
-async def process_json_dump(
+async def process_jsonl_dump(
     filepath: str,
     datastore: DataStore,
     custom_metadata: dict,
     screen_for_pii: bool,
     extract_metadata: bool,
 ):
-    # load the json file as a list of dictionaries
-    with open(filepath) as json_file:
-        data = json.load(json_file)
+    # open the jsonl file as a generator of dictionaries
+    with open(filepath) as jsonl_file:
+        data = [json.loads(line) for line in jsonl_file]
 
     documents = []
     skipped_items = []
@@ -53,7 +52,6 @@ async def process_json_dump(
                 created_at=created_at,
                 author=author,
             )
-            print("metadata: ", str(metadata))
 
             # update metadata with custom values
             for key, value in custom_metadata.items():
@@ -78,9 +76,9 @@ async def process_json_dump(
                 # get a Metadata object from the extracted metadata
                 metadata = DocumentMetadata(**extracted_metadata)
 
-            # create a document object with the id or a random id, text and metadata
+            # create a document object with the id, text and metadata
             document = Document(
-                id=id or str(uuid.uuid4()),
+                id=id,
                 text=text,
                 metadata=metadata,
             )
@@ -96,7 +94,6 @@ async def process_json_dump(
         # Get the text of the chunks in the current batch
         batch_documents = documents[i : i + DOCUMENT_UPSERT_BATCH_SIZE]
         print(f"Upserting batch of {len(batch_documents)} documents, batch {i}")
-        print("documents: ", documents)
         await datastore.upsert(batch_documents)
 
     # print the skipped items
@@ -108,7 +105,7 @@ async def process_json_dump(
 async def main():
     # parse the command-line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--filepath", required=True, help="The path to the json dump")
+    parser.add_argument("--filepath", required=True, help="The path to the jsonl dump")
     parser.add_argument(
         "--custom_metadata",
         default="{}",
@@ -136,8 +133,8 @@ async def main():
 
     # initialize the db instance once as a global variable
     datastore = await get_datastore()
-    # process the json dump
-    await process_json_dump(
+    # process the jsonl dump
+    await process_jsonl_dump(
         filepath, datastore, custom_metadata, screen_for_pii, extract_metadata
     )
 

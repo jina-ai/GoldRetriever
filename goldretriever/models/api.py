@@ -1,4 +1,4 @@
-from goldenretriever.models.models import (
+from goldretriever.models.models import (
     Document,
     DocumentMetadataFilter,
     Query,

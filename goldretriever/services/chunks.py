@@ -1,10 +1,10 @@
 from typing import Dict, List, Optional, Tuple
 import uuid
-from goldenretriever.models.models import Document, DocumentChunk, DocumentChunkMetadata
+from goldretriever.models.models import Document, DocumentChunk, DocumentChunkMetadata
 
 import tiktoken
 
-from goldenretriever.services.openai import get_embeddings
+from goldretriever.services.openai import get_embeddings
 
 # Global variables
 tokenizer = tiktoken.get_encoding(
