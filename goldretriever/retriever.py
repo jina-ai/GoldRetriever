@@ -155,8 +155,8 @@ def upsert_files(files, bearer_token, flow_id):
         "Authorization": f"Bearer {bearer_token}",
     }
     for file in files:
-        files = {"file": (file, open(file, "rb"), mimetypes.guess_type(file)[0])}
-        response = requests.post(endpoint_url, headers=headers, files=files)
+        file_bytes = {"file": (file, open(file, "rb"), mimetypes.guess_type(file)[0])}
+        response = requests.post(endpoint_url, headers=headers, files=file_bytes)
         if response.status_code != 200:
             print("Could not index the file")
             print(response.text)
