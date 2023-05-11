@@ -1,11 +1,11 @@
-# Gold Retriever
+# 🐕 Gold Retriever
 
 Easily empower ChatGPT to store and analyze your data using `goldretriever`, a powerful command-line tool for creating and hosting retrieval plugins in just a few simple steps.
 
 
-## Quick Start
+## ⚡ Quick Start
 
-### Installation
+### 📦 Installation
 
 1. Ensure you have Python 3.8 or later.
 2. Install the tool via pip:
@@ -13,7 +13,7 @@ Easily empower ChatGPT to store and analyze your data using `goldretriever`, a p
   pip install goldretriever
   ```
 
-### Deployment
+### 🚀 Deployment
 1. Run the following command to deploy the plugin:
 ```bash
 goldretriever deploy --key <your openai key>
@@ -30,7 +30,7 @@ goldretriever deploy --key <your openai key>
 Bearer token: <your bearer token>
 ```
 
-### Data Indexing
+### 📚 Data Indexing
 1. Gather relevant text data files (PDF, TXT, DOCX, PPTX, or MD) in a directory.
 2. Index the data:
 ```bash
@@ -49,16 +49,16 @@ And then:
 goldretriever index --data docs.bin
 ```
 
-### Integration
+### 🔗 Integration
 1. Go to OpenAI Plugins.
 2. Select "Develop your own plugin".
 3. Enter the "Gateway (Http)" URL and Bearer token from the deployment step.
 
 
-## Advanced Usage
+## 🎛️ Advanced Usage
 
 
-### Configuration
+### 🛠️ Configuration
 To tailor the plugin to your needs, change the name and description during deployment:
 ```bash
 goldretriever deploy --key <your openai key> --name "Custom Name" --description "Custom description"
@@ -67,12 +67,12 @@ If not specified, default values will be used.
 
 | Argument    | Description                                   | Default Value                                                                                                                                                                                                                               |
 |:------------|:----------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| name        | Human-readable name, such as the full company name	  | Retrieval Plugin                                                                                                                                                                                                                            |
+| name        | Human-readable name, such as the full company name	  | Gold Retriever                                                                                                                                                                                                                              |
 | description | Description better tailored to the model, such as token context length considerations or keyword usage for improved plugin prompting                                      | Plugin for searching through the user's documents (such as files, emails, and more) to find answers to questions and retrieve relevant information. Use it whenever a user asks something that might be found in their personal information |
 
 
 
-### Listing Plugins
+### 📋 Listing Plugins
 List your plugins and their status:
 ```bash
 goldretriever list
@@ -83,13 +83,13 @@ Output:
 Plugin ID: ece735568f | Status: Serving
 ```
 
-### Deleting Plugins
+### ❌ Deleting Plugins
 Delete a plugin:
 ```bash
 goldretriever delete <plugin id>
 ```
 
-### Indexing Specific Plugins
+### 🔍 Indexing Specific Plugins
 Index data for a specific plugin:
 ```bash
 goldretriever index --data my_files --id <plugin_id>

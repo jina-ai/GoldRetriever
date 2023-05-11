@@ -118,7 +118,7 @@ def check_openai_key(openai_key: Optional[str] = None):
 
 
 def upsert_documents(docs, bearer_token, flow_id, n_docs=5):
-    print(f"Indexing documents into {flow_id}")
+    print(f"Indexing documents for {flow_id}")
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert"
     headers = {
         "accept": "application/json",
@@ -145,21 +145,22 @@ def upsert_documents(docs, bearer_token, flow_id, n_docs=5):
         if response.status_code != 200:
             print("Could not index the documents")
             print(response.text)
+    print(f"{len(docs)} documents have been successfully indexed!")
 
 
 def upsert_files(files, bearer_token, flow_id):
-    print(f"Indexing files into {flow_id}")
+    print(f"Indexing files for {flow_id}")
     endpoint_url = f"https://{flow_id}.wolf.jina.ai/upsert-file"
     headers = {
         "Authorization": f"Bearer {bearer_token}",
     }
     for file in files:
-        print(f"Indexing {file}")
         files = {"file": (file, open(file, "rb"), mimetypes.guess_type(file)[0])}
         response = requests.post(endpoint_url, headers=headers, files=files)
         if response.status_code != 200:
             print("Could not index the file")
             print(response.text)
+    print(f"{len(files)} files have been successfully indexed!")
 
 
 @app.command()
