@@ -939,13 +939,13 @@ files = [
 
 [[package]]
 name = "jcloud"
-version = "0.2.6"
+version = "0.2.9"
 description = "Simplify deploying and managing Jina projects on Jina Cloud"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "jcloud-0.2.6.tar.gz", hash = "sha256:42d15bf7cb7890e9713111b861789ca4d3d1085217d6cae0072f2cfda3a972f4"},
+    {file = "jcloud-0.2.9.tar.gz", hash = "sha256:eaf8da685f8907e153ff752e6a4b945aeff548b8d94dfd650a035d8450ed547e"},
 ]
 
 [package.dependencies]
@@ -2936,4 +2936,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "17b38ba49763ff549c0b73ca987f1c8ccf254f6c23f499967c937c9dffed1216"
+content-hash = "ceec1c9d0bb915591abae6ea63386f51f5e73d903387062331f08dafae913d1b"
