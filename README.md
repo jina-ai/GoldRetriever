@@ -1,6 +1,7 @@
 # 🐕 Gold Retriever
-
 Easily empower ChatGPT to store and analyze your data using `goldretriever`, a powerful command-line tool for creating and hosting retrieval plugins in just a few simple steps.
+
+![Blog images](https://github.com/jina-ai/GoldRetriever/assets/45267439/7f35d0ed-9ec7-489d-8ab7-ac8ea84d207a)
 
 
 ## ⚡ Quick Start
@@ -83,7 +84,7 @@ Output:
 Plugin ID: ece735568f | Status: Serving
 ```
 
-### ❌ Deleting Plugins
+### 🗑️ Deleting Plugins
 Delete a plugin:
 ```bash
 goldretriever delete <plugin id>
@@ -95,3 +96,6 @@ Index data for a specific plugin:
 goldretriever index --data my_files --id <plugin_id>
 ```
 If the plugin ID is not specified, the last created plugin will be indexed.
+
+## 🎓 Acknowledgements
+This project is built upon the open-source [chatgpt-retrieval-plugin](https://github.com/openai/chatgpt-retrieval-plugin) repository developed by OpenAI.
