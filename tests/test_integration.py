@@ -16,7 +16,7 @@ class TestRetriever(unittest.TestCase):
     def test_create_plugin(self):
         result = self.runner.invoke(app, ['deploy', '--key', self.key])
         self.assertIn('Flow is available!', result.stdout.strip())
-        time.sleep(5)
+        time.sleep(15)
         flows = get_flows(keyword='test-retrieval')
         self.assertEqual(len(flows), 1)
 
