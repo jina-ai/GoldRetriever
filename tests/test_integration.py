@@ -1,27 +1,35 @@
 import os
+import unittest
+from unittest.mock import patch
 
 from typer.testing import CliRunner
 from goldretriever.retriever import app, get_flows
-from unittest.mock import patch
+import time
 
-runner = CliRunner()
+class TestRetriever(unittest.TestCase):
+    def setUp(self):
+        self.runner = CliRunner()
+        self.key = os.environ['RETRIEVAL_OPENAI_KEY']
+        self.test_flow_path = 'tests/resources/test_flow.yml'
 
+    @patch('goldretriever.retriever.FLOW_PATH', 'tests/resources/test_flow.yml')
+    def test_create_plugin(self):
+        result = self.runner.invoke(app, ['deploy', '--key', self.key])
+        self.assertIn('Flow is available!', result.stdout.strip())
+        time.sleep(15)
+        flows = get_flows(keyword='test-retrieval')
+        self.assertEqual(len(flows), 1)
 
-@patch('goldretriever.retriever.FLOW_PATH', 'tests/resources/test_flow.yml')
-def test_create_plugin():
-    result = runner.invoke(app, ['deploy', '--key', os.environ['RETRIEVAL_OPENAI_KEY']])
-    assert 'Flow is available!' in result.stdout.strip()
+        flow_id = flows[0]['id']
+        self.assertEqual(os.environ['RETRIEVAL_FLOW_ID'], flow_id)
 
-    flows = get_flows(keyword='test-retrieval')
-    assert len(flows) == 1
+        self.runner.invoke(app, ['index', '--data', 'tests/resources/text_data/'])
 
-    flow_id = flows[0]['id']
-    assert os.environ['RETRIEVAL_FLOW_ID'] == flow_id
+        result = self.runner.invoke(app, ['query', 'blue'])
+        self.assertIn('Blue is a primary color', result.stdout.strip())
 
-    runner.invoke(app, ['index', '--data', 'tests/resources/text_data/'])
+        result = self.runner.invoke(app, ['delete', flow_id])
+        self.assertIn('was successfully deleted', result.stdout.strip())
 
-    result = runner.invoke(app, ['query', 'blue'])
-    assert 'Blue is a primary color' in result.stdout.strip()
-
-    result = runner.invoke(app, ['delete', flow_id])
-    assert 'was successfully deleted' in result.stdout.strip()
+if __name__ == '__main__':
+    unittest.main()
