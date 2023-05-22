@@ -37,13 +37,13 @@ jobs:
       env:
         WOLF_TOKEN: ${{ secrets.WOLF_TOKEN }}
 
-#    - name: Run tests
-#      run: |
-#        source .venv/bin/activate
-#        export PYTHONPATH=$(pwd)
-#        poetry run python -m unittest discover tests/
-#      env:
-#        RETRIEVAL_OPENAI_KEY: ${{ secrets.RETRIEVAL_OPENAI_KEY }}
+    - name: Run tests
+      run: |
+        source .venv/bin/activate
+        export PYTHONPATH=$(pwd)
+        poetry run python -m unittest discover tests/
+      env:
+        RETRIEVAL_OPENAI_KEY: ${{ secrets.RETRIEVAL_OPENAI_KEY }}
 
     - name: Build and upload package
       if: ${{ success() }}
