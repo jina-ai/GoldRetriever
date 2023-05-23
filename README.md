@@ -1,4 +1,6 @@
 # 🐕 Gold Retriever
+>Powered by [Jina](https://github.com/jina-ai/jina) and [DocArray](https://github.com/docarray/docarray)
+
 Easily empower ChatGPT to store and analyze your data using `goldretriever`, a powerful command-line tool for creating and hosting retrieval plugins in just a few simple steps.
 
 ![Blog images](https://github.com/jina-ai/GoldRetriever/assets/45267439/e722a8a8-3308-45a4-a7f6-34c71f5a2215)
