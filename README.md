@@ -1,7 +1,7 @@
 # 🐕 Gold Retriever
 Easily empower ChatGPT to store and analyze your data using `goldretriever`, a powerful command-line tool for creating and hosting retrieval plugins in just a few simple steps.
 
-![Blog images](https://github.com/jina-ai/GoldRetriever/assets/45267439/7f35d0ed-9ec7-489d-8ab7-ac8ea84d207a)
+![Blog images](https://github.com/jina-ai/GoldRetriever/assets/45267439/e722a8a8-3308-45a4-a7f6-34c71f5a2215)
 
 
 ## ⚡ Quick Start
