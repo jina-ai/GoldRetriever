@@ -5,6 +5,9 @@ Easily empower ChatGPT to store and analyze your data using `goldretriever`, a p
 
 ![Blog images](https://github.com/jina-ai/GoldRetriever/assets/45267439/e722a8a8-3308-45a4-a7f6-34c71f5a2215)
 
+### 🎬 Showcase: Real-world Plugin Creations
+
+- Personal Study Assistant - [Blog](https://jina.ai/news/gold-retriever-let-chatgpt-talk-to-your-data/) | [Video](https://www.youtube.com/watch?v=gQz-vuo8w5I)
 
 ## ⚡ Quick Start
 
