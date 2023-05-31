@@ -277,6 +277,35 @@ def query(
 
 
 @app.command()
+def launch(
+    bearer_token: Optional[str],
+    key: Optional[str]
+):
+    read_envs()
+    bearer_token = check_bearer_token(bearer_token, generate=True)
+    openai_key = check_openai_key(key)
+
+    try:
+        flow = (
+            Flow()
+            .config_gateway(
+                uses="docker://plugin-gateway-two",
+                port=12345,
+                protocol="http",
+                env={"OPENAI_API_KEY": openai_key, "BEARER_TOKEN": bearer_token},
+            )
+            .add(uses="docker://gpt-plugin-indexer")
+        )
+    except Exception as e:
+        print(
+            "Did you build the docker images? You can also use the `launch_no_docker` command to run without docker."
+        )
+        raise e
+    with flow:
+        flow.block()
+
+
+@app.command()
 def deploy(
     bearer_token: Optional[str] = typer.Option(None),
     key: Optional[str] = typer.Option(None),
