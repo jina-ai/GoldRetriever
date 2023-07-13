@@ -1,6 +1,7 @@
 jtype: Flow
 version: '1'
 jcloud:
+  docarray: 0.21.0
   name: retrieval-plugin
 gateway:
   protocol: [http]
