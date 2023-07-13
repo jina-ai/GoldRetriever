@@ -19,6 +19,14 @@ jobs:
       with:
         python-version: '3.8'
 
+    - name: Set up Python environment
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install poetry twine wheel
+        poetry install --no-root
+
     - name: Build and upload package
       if: ${{ success() }}
       run: |
