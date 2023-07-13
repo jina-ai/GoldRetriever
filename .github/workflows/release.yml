@@ -1,0 +1,29 @@
+name: Continuous Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+
+jobs:
+  test_and_release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Build and upload package
+      if: ${{ success() }}
+      run: |
+        source .venv/bin/activate
+        poetry build
+        echo ${{ secrets.TWINE_PASSWORD }} | twine upload --repository-url https://upload.pypi.org/legacy/ -u ${{ secrets.TWINE_USERNAME }} -p ${{ secrets.TWINE_PASSWORD }} dist/*
+      env:
+        RELEASE_TAG: ${{ github.event.inputs.release_tag }}
