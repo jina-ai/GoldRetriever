@@ -3,6 +3,8 @@ version: '1'
 jcloud:
   docarray: 0.21.0
   name: retrieval-plugin
+  labels:
+    app: retrieval-plugin
 gateway:
   protocol: [http]
   uses: jinaai+docker://auth0-unified-b06aa99c0fdac54c/GptRetrievalGateway:latest
