@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "goldretriever"
-version = "0.1.4"
+version = "0.1.5"
 description = "Create and host retrieval plugins for ChatGPT in one click"
 authors = ["Jina AI <hello@jina.ai>"]
 readme = "README.md"

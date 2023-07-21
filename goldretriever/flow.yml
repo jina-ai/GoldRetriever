@@ -9,7 +9,7 @@ gateway:
   protocol: [http]
   uses: jinaai+docker://auth0-unified-b06aa99c0fdac54c/GptRetrievalGateway:latest
   port:
-    - 12345
+    - 8080
   port_monitoring: 51036
   uses_with:
     plugin_description: <plugin-description>
